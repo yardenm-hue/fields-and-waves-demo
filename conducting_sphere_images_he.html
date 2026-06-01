@@ -1,0 +1,1322 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>שיטת מטעני השיקוף: כדור מוליך</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #617089;
+      --line: #d8e0ea;
+      --blue: #1d64d8;
+      --coral: #d65645;
+      --green: #12866f;
+      --amber: #a96f00;
+      --violet: #6f55c7;
+      --charge-negative: #0c8891;
+      --charge-positive: #b42d82;
+      --shadow: 0 18px 45px rgba(29, 44, 73, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      direction: rtl;
+      text-align: right;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #f8fafc 0%, #edf3f9 100%);
+      color: var(--ink);
+    }
+
+    main {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 26px 0 34px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: end;
+      padding: 4px 0 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2.45rem;
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      max-width: 770px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.55;
+    }
+
+    .portal-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      margin-top: 14px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 8px 24px rgba(29, 44, 73, 0.08);
+      color: var(--blue);
+      font-size: 0.93rem;
+      font-weight: 700;
+      line-height: 1.2;
+      text-decoration: none;
+    }
+
+    .portal-link:hover {
+      border-color: rgba(29, 100, 216, 0.45);
+      background: #ffffff;
+    }
+
+    .portal-link:focus-visible {
+      outline: 3px solid rgba(29, 100, 216, 0.34);
+      outline-offset: 3px;
+    }
+
+    .formula {
+      justify-self: end;
+      max-width: 575px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 8px 24px rgba(29, 44, 73, 0.08);
+      color: #24324a;
+      direction: ltr;
+      text-align: left;
+      unicode-bidi: isolate;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.83rem;
+      line-height: 1.48;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .plot-panel,
+    .controls {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow);
+    }
+
+    .plot-panel {
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .plot-toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .plot-title {
+      min-width: 0;
+    }
+
+    .plot-title h2,
+    .controls h2 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+    .status {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .legend i {
+      display: inline-block;
+      width: 26px;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--blue);
+    }
+
+    .legend .potential {
+      height: 10px;
+      border: 1px solid rgba(23, 32, 51, 0.14);
+      background: linear-gradient(90deg, #3d76d9, #f8fafc, #d65645);
+    }
+
+    .legend .contour {
+      background: var(--coral);
+    }
+
+    .legend .charge {
+      height: 10px;
+      background: linear-gradient(90deg, var(--charge-negative), var(--charge-positive));
+    }
+
+    .legend .image {
+      height: 10px;
+      border: 1px dashed rgba(38, 48, 71, 0.55);
+      background: rgba(111, 85, 199, 0.22);
+    }
+
+    .canvas-shell {
+      height: 610px;
+      min-height: 490px;
+      background: #f8fafc;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .controls {
+      padding: 16px;
+    }
+
+    .control-group {
+      display: grid;
+      gap: 13px;
+      padding-top: 15px;
+    }
+
+    .control-row {
+      display: grid;
+      gap: 7px;
+    }
+
+    .control-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: #263047;
+      font-size: 0.9rem;
+      font-weight: 650;
+    }
+
+    output {
+      color: var(--muted);
+      direction: ltr;
+      unicode-bidi: isolate;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    select,
+    input[type="range"] {
+      width: 100%;
+    }
+
+    select {
+      height: 38px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    input[type="range"] {
+      accent-color: var(--blue);
+    }
+
+    .toggles {
+      display: grid;
+      gap: 8px;
+      padding-top: 2px;
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #263047;
+      font-size: 0.9rem;
+    }
+
+    .toggle input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--blue);
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding-top: 4px;
+    }
+
+    button {
+      min-height: 39px;
+      border: 0;
+      border-radius: 7px;
+      background: var(--blue);
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+    }
+
+    button:focus-visible,
+    select:focus-visible,
+    input:focus-visible {
+      outline: 3px solid rgba(29, 100, 216, 0.22);
+      outline-offset: 2px;
+    }
+
+    .readout {
+      display: grid;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 15px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+
+    .readout strong {
+      color: var(--ink);
+    }
+
+    .readout span:not(#sigmaReadout) {
+      display: inline-block;
+      direction: ltr;
+      unicode-bidi: isolate;
+    }
+
+    #sigmaReadout {
+      unicode-bidi: isolate;
+    }
+
+    footer {
+      margin-top: 24px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    footer a {
+      color: var(--blue);
+      font-weight: 700;
+    }
+
+    @media (max-width: 920px) {
+      header,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .formula {
+        justify-self: stretch;
+      }
+
+      .canvas-shell {
+        height: 520px;
+        min-height: 430px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      main {
+        width: min(100% - 18px, 520px);
+      }
+
+      h1 {
+        font-size: 1.68rem;
+      }
+
+      .plot-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .legend {
+        justify-content: flex-start;
+      }
+
+      .canvas-shell {
+        height: 450px;
+        min-height: 390px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>שיטת מטעני השיקוף: כדור מוליך</h1>
+        <p class="subtitle">מטען נקודתי מחוץ לכדור מוליך מושלם, הנפתר על ידי החלפת המוליך במטעני שיקוף בתוך הכדור. צבע השפה מציין את צפיפות המטען המשטחית האמיתית המושרית על המוליך.</p>
+        <a class="portal-link" href="portal_he.html">חזרה לפורטל</a>
+      </div>
+      <div class="formula">
+        R = 1, &nbsp; k = 1/(4&pi;&epsilon;<sub>0</sub>) = 1<br>
+        q' = -(R/d)q, &nbsp; x' = R<sup>2</sup>/d<br>
+        V = q/|r - d xhat| + q'/|r - x' xhat| + Q<sub>0</sub>/r<br>
+        Q<sub>0</sub> = R V<sub>s</sub>, &nbsp; &sigma;/&epsilon;<sub>0</sub> = E<sub>r</sub>(R,&theta;)
+      </div>
+    </header>
+
+    <section class="layout" aria-label="יישומון מטעני שיקוף עבור כדור מוליך">
+      <section class="plot-panel">
+        <div class="plot-toolbar">
+          <div class="plot-title">
+            <h2>פוטנציאל, שדה ומטעני שיקוף</h2>
+            <p class="status" id="status">מכין שרטוט</p>
+          </div>
+          <div class="legend" aria-label="מקרא">
+            <span><i class="potential"></i>פוטנציאל</span>
+            <span><i class="contour"></i>קווים שווי פוטנציאל</span>
+            <span><i></i>וקטורי שדה</span>
+            <span><i class="charge"></i>מטען פני שטח</span>
+            <span><i class="image"></i>מטען מדומה</span>
+          </div>
+        </div>
+        <div class="canvas-shell">
+          <canvas id="plot" aria-label="שיטת מטעני השיקוף עבור כדור מוליך"></canvas>
+        </div>
+      </section>
+
+      <aside class="controls">
+        <h2>הגדרות</h2>
+        <div class="control-group">
+          <label class="control-row">
+            <span class="control-head">המטען האמיתי q <output id="chargeValue">+1.00</output></span>
+            <input id="charge" type="range" min="-2" max="2" step="0.05" value="1">
+          </label>
+
+          <label class="control-row">
+            <span class="control-head">מרחק המטען d <output id="distanceValue">2.00 R</output></span>
+            <input id="distance" type="range" min="1.18" max="3.15" step="0.01" value="2">
+          </label>
+
+          <label class="control-row">
+            <span class="control-head"><span>פוטנציאל הכדור V<sub>s</sub></span> <output id="spherePotentialValue">0.00</output></span>
+            <input id="spherePotential" type="range" min="-1.5" max="1.5" step="0.02" value="0">
+          </label>
+
+          <label class="control-row">
+            <span class="control-head">רשת <output id="resolutionValue">181 x 135</output></span>
+            <select id="resolution">
+              <option value="141x105">גסה 141 x 105</option>
+              <option value="181x135" selected>רגילה 181 x 135</option>
+              <option value="241x181">עדינה 241 x 181</option>
+            </select>
+          </label>
+
+          <label class="control-row">
+            <span class="control-head">קווים שווי פוטנציאל <output id="levelsValue">18</output></span>
+            <input id="levels" type="range" min="6" max="34" step="1" value="18">
+          </label>
+
+          <label class="control-row">
+            <span class="control-head">צפיפות וקטורים <output id="vectorsValue">15</output></span>
+            <input id="vectors" type="range" min="8" max="24" step="1" value="15">
+          </label>
+
+          <div class="toggles">
+            <label class="toggle"><input id="showHeat" type="checkbox" checked> מפת פוטנציאל</label>
+            <label class="toggle"><input id="showContours" type="checkbox" checked> קווים שווי פוטנציאל</label>
+            <label class="toggle"><input id="showVectors" type="checkbox" checked> וקטורי שדה</label>
+            <label class="toggle"><input id="showSurfaceCharge" type="checkbox" checked> מטען פני שטח על השפה</label>
+            <label class="toggle"><input id="showImages" type="checkbox" checked> מטעני שיקוף</label>
+          </div>
+
+          <div class="button-row">
+            <button id="redraw" type="button">שרטט מחדש</button>
+            <button id="defaults" type="button" class="secondary">ברירת מחדל</button>
+          </div>
+        </div>
+
+        <div class="readout" aria-live="polite">
+          <div><strong id="groundReadout">כדור מוליך מוארק</strong></div>
+          <div>מטען מדומה q': <span id="imageChargeReadout">-0.500</span></div>
+          <div>מיקום המטען המדומה x': <span id="imagePositionReadout">0.500 R</span></div>
+          <div>מטען מדומה מרכזי Q<sub>0</sub>: <span id="centralChargeReadout">0.000</span></div>
+          <div>מטען כולל על המוליך: <span id="netChargeReadout">-0.500</span></div>
+          <div>מטען פני שטח &sigma;/&epsilon;<sub>0</sub>: <span id="sigmaReadout">-3.00 עד -0.11</span></div>
+          <div>נקודות דגימה ברשת: <span id="sampleReadout">24,435</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <footer dir="ltr">
+      created by <a href="https://wavetheory.group">Yarden Mazor</a>, School of ECE, Tel-Aviv University
+    </footer>
+  </main>
+
+  <script>
+    const RADIUS = 1;
+    const DOMAIN = {
+      xMin: -1.65,
+      xMax: 3.55,
+      yMin: -1.95,
+      yMax: 1.95
+    };
+
+    const DEFAULTS = {
+      charge: 1,
+      distance: 2,
+      spherePotential: 0,
+      resolution: "181x135",
+      levels: 18,
+      vectors: 15,
+      showHeat: true,
+      showContours: true,
+      showVectors: true,
+      showSurfaceCharge: true,
+      showImages: true
+    };
+
+    const DISPLAY_SOFTENING = 0.035;
+    const FIELD_SOFTENING = 0.022;
+    const CONDUCTOR_MARGIN = 0.012;
+
+    const COLOR_STOPS = [
+      { t: 0.00, c: [61, 118, 217] },
+      { t: 0.28, c: [151, 196, 226] },
+      { t: 0.50, c: [249, 251, 253] },
+      { t: 0.72, c: [239, 197, 118] },
+      { t: 1.00, c: [214, 86, 69] }
+    ];
+
+    const refs = {
+      canvas: document.getElementById("plot"),
+      status: document.getElementById("status"),
+      charge: document.getElementById("charge"),
+      distance: document.getElementById("distance"),
+      spherePotential: document.getElementById("spherePotential"),
+      resolution: document.getElementById("resolution"),
+      levels: document.getElementById("levels"),
+      vectors: document.getElementById("vectors"),
+      showHeat: document.getElementById("showHeat"),
+      showContours: document.getElementById("showContours"),
+      showVectors: document.getElementById("showVectors"),
+      showSurfaceCharge: document.getElementById("showSurfaceCharge"),
+      showImages: document.getElementById("showImages"),
+      redraw: document.getElementById("redraw"),
+      defaults: document.getElementById("defaults"),
+      chargeValue: document.getElementById("chargeValue"),
+      distanceValue: document.getElementById("distanceValue"),
+      spherePotentialValue: document.getElementById("spherePotentialValue"),
+      resolutionValue: document.getElementById("resolutionValue"),
+      levelsValue: document.getElementById("levelsValue"),
+      vectorsValue: document.getElementById("vectorsValue"),
+      groundReadout: document.getElementById("groundReadout"),
+      imageChargeReadout: document.getElementById("imageChargeReadout"),
+      imagePositionReadout: document.getElementById("imagePositionReadout"),
+      centralChargeReadout: document.getElementById("centralChargeReadout"),
+      netChargeReadout: document.getElementById("netChargeReadout"),
+      sigmaReadout: document.getElementById("sigmaReadout"),
+      sampleReadout: document.getElementById("sampleReadout")
+    };
+
+    const state = {
+      solution: null,
+      recomputeTimer: 0
+    };
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function parseResolution(value) {
+      const parts = value.split("x").map(Number);
+      return { nx: parts[0], ny: parts[1] };
+    }
+
+    function formatSigned(value, digits = 2) {
+      const rounded = Math.abs(value) < Math.pow(10, -digits) / 2 ? 0 : value;
+      return (rounded > 0 ? "+" : "") + rounded.toFixed(digits);
+    }
+
+    function formatPotential(value) {
+      if (Math.abs(value) < 0.005) {
+        return "0.00";
+      }
+      return formatSigned(value, 2);
+    }
+
+    function ltrText(text) {
+      return "\u2066" + text + "\u2069";
+    }
+
+    function controls() {
+      const resolution = parseResolution(refs.resolution.value);
+      return {
+        charge: Number(refs.charge.value),
+        distance: Number(refs.distance.value),
+        spherePotential: Number(refs.spherePotential.value),
+        nx: resolution.nx,
+        ny: resolution.ny,
+        levels: Number(refs.levels.value),
+        vectors: Number(refs.vectors.value),
+        showHeat: refs.showHeat.checked,
+        showContours: refs.showContours.checked,
+        showVectors: refs.showVectors.checked,
+        showSurfaceCharge: refs.showSurfaceCharge.checked,
+        showImages: refs.showImages.checked
+      };
+    }
+
+    function imageParams(c) {
+      const imagePosition = RADIUS * RADIUS / c.distance;
+      const imageCharge = -RADIUS * c.charge / c.distance;
+      const centralCharge = RADIUS * c.spherePotential;
+      return {
+        imagePosition,
+        imageCharge,
+        centralCharge,
+        netConductorCharge: imageCharge + centralCharge
+      };
+    }
+
+    function updateControlText() {
+      const c = controls();
+      const params = imageParams(c);
+      refs.chargeValue.textContent = formatSigned(c.charge, 2);
+      refs.distanceValue.textContent = c.distance.toFixed(2) + " R";
+      refs.spherePotentialValue.textContent = formatPotential(c.spherePotential);
+      refs.resolutionValue.textContent = c.nx + " x " + c.ny;
+      refs.levelsValue.textContent = String(c.levels);
+      refs.vectorsValue.textContent = String(c.vectors);
+      refs.groundReadout.textContent = Math.abs(c.spherePotential) < 0.005 ? "כדור מוליך מוארק" : "הכדור מוחזק ב-" + ltrText("V_s = " + formatPotential(c.spherePotential));
+      refs.imageChargeReadout.textContent = formatSigned(params.imageCharge, 3);
+      refs.imagePositionReadout.textContent = params.imagePosition.toFixed(3) + " R";
+      refs.centralChargeReadout.textContent = formatSigned(params.centralCharge, 3);
+      refs.netChargeReadout.textContent = formatSigned(params.netConductorCharge, 3);
+      refs.sampleReadout.textContent = (c.nx * c.ny).toLocaleString();
+    }
+
+    function pointPotential(x, y, charge, x0, y0, softening = 0) {
+      const dx = x - x0;
+      const dy = y - y0;
+      return charge / Math.sqrt(dx * dx + dy * dy + softening * softening);
+    }
+
+    function potentialAt(x, y, c, options = {}) {
+      const radius = Math.hypot(x, y);
+      if (radius <= RADIUS) {
+        return c.spherePotential;
+      }
+
+      const params = imageParams(c);
+      const softening = options.display ? DISPLAY_SOFTENING : 0;
+      return (
+        pointPotential(x, y, c.charge, c.distance, 0, softening) +
+        pointPotential(x, y, params.imageCharge, params.imagePosition, 0, 0) +
+        pointPotential(x, y, params.centralCharge, 0, 0, 0)
+      );
+    }
+
+    function fieldContribution(x, y, charge, x0, y0, softening = 0) {
+      const dx = x - x0;
+      const dy = y - y0;
+      const r2 = dx * dx + dy * dy + softening * softening;
+      if (r2 < 1e-14 || Math.abs(charge) < 1e-14) {
+        return { ex: 0, ey: 0 };
+      }
+      const invR3 = 1 / (r2 * Math.sqrt(r2));
+      return {
+        ex: charge * dx * invR3,
+        ey: charge * dy * invR3
+      };
+    }
+
+    function fieldFromImages(x, y, c, softening = 0) {
+      const params = imageParams(c);
+      const real = fieldContribution(x, y, c.charge, c.distance, 0, softening);
+      const image = fieldContribution(x, y, params.imageCharge, params.imagePosition, 0, 0);
+      const center = fieldContribution(x, y, params.centralCharge, 0, 0, 0);
+      return {
+        ex: real.ex + image.ex + center.ex,
+        ey: real.ey + image.ey + center.ey
+      };
+    }
+
+    function fieldAtPoint(x, y, c, options = {}) {
+      if (Math.hypot(x, y) <= RADIUS + CONDUCTOR_MARGIN) {
+        return { ex: 0, ey: 0 };
+      }
+      return fieldFromImages(x, y, c, options.display ? FIELD_SOFTENING : 0);
+    }
+
+    function surfaceSigma(theta, c) {
+      const x = RADIUS * Math.cos(theta);
+      const y = RADIUS * Math.sin(theta);
+      const field = fieldFromImages(x, y, c, 0);
+      return field.ex * Math.cos(theta) + field.ey * Math.sin(theta);
+    }
+
+    function index(i, j, nx) {
+      return j * nx + i;
+    }
+
+    function percentile(values, fraction) {
+      if (!values.length) {
+        return 1;
+      }
+      values.sort((a, b) => a - b);
+      const at = clamp(Math.floor((values.length - 1) * fraction), 0, values.length - 1);
+      return values[at];
+    }
+
+    function buildSolution() {
+      const c = controls();
+      const v = new Float64Array(c.nx * c.ny);
+      const dx = (DOMAIN.xMax - DOMAIN.xMin) / (c.nx - 1);
+      const dy = (DOMAIN.yMax - DOMAIN.yMin) / (c.ny - 1);
+      const absVoltages = [];
+      let minSigma = Infinity;
+      let maxSigma = -Infinity;
+      let peakField = 0;
+
+      for (let j = 0; j < c.ny; j += 1) {
+        const y = DOMAIN.yMin + j * dy;
+        for (let i = 0; i < c.nx; i += 1) {
+          const x = DOMAIN.xMin + i * dx;
+          const k = index(i, j, c.nx);
+          const voltage = potentialAt(x, y, c, { display: true });
+          const outside = Math.hypot(x, y) > RADIUS + CONDUCTOR_MARGIN;
+          const awayFromRealCharge = Math.hypot(x - c.distance, y) > 0.10;
+          v[k] = voltage;
+          if (outside && awayFromRealCharge && Number.isFinite(voltage)) {
+            absVoltages.push(Math.abs(voltage));
+            const field = fieldAtPoint(x, y, c, { display: true });
+            peakField = Math.max(peakField, Math.hypot(field.ex, field.ey));
+          }
+        }
+      }
+
+      const sigmaSamples = 288;
+      for (let i = 0; i < sigmaSamples; i += 1) {
+        const sigma = surfaceSigma(i * Math.PI * 2 / sigmaSamples, c);
+        minSigma = Math.min(minSigma, sigma);
+        maxSigma = Math.max(maxSigma, sigma);
+      }
+
+      const displayScale = Math.max(0.12, percentile(absVoltages, 0.93));
+      const vectorScale = Math.max(0.08, peakField * 0.50);
+      state.solution = {
+        ...c,
+        xMin: DOMAIN.xMin,
+        xMax: DOMAIN.xMax,
+        yMin: DOMAIN.yMin,
+        yMax: DOMAIN.yMax,
+        width: DOMAIN.xMax - DOMAIN.xMin,
+        height: DOMAIN.yMax - DOMAIN.yMin,
+        dx,
+        dy,
+        v,
+        displayScale,
+        vectorScale,
+        minSigma,
+        maxSigma,
+        params: imageParams(c)
+      };
+
+      refs.status.textContent = "q = " + formatSigned(c.charge, 2) + ", d = " + c.distance.toFixed(2) + " R, V_s = " + formatPotential(c.spherePotential);
+      refs.sigmaReadout.textContent = ltrText(formatSigned(minSigma, 2)) + " עד " + ltrText(formatSigned(maxSigma, 2));
+      draw();
+    }
+
+    function canvasSize() {
+      const rect = refs.canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const width = Math.max(320, Math.round(rect.width));
+      const height = Math.max(320, Math.round(rect.height));
+      const pixelWidth = Math.round(width * dpr);
+      const pixelHeight = Math.round(height * dpr);
+      if (refs.canvas.width !== pixelWidth || refs.canvas.height !== pixelHeight) {
+        refs.canvas.width = pixelWidth;
+        refs.canvas.height = pixelHeight;
+      }
+      const ctx = refs.canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { ctx, width, height };
+    }
+
+    function plotBox(width, height, domainWidth, domainHeight) {
+      const padding = { left: 54, right: 30, top: 30, bottom: 46 };
+      const availableWidth = width - padding.left - padding.right;
+      const availableHeight = height - padding.top - padding.bottom;
+      const scale = Math.min(availableWidth / domainWidth, availableHeight / domainHeight);
+      const plotWidth = domainWidth * scale;
+      const plotHeight = domainHeight * scale;
+      return {
+        x: padding.left + (availableWidth - plotWidth) / 2,
+        y: padding.top + (availableHeight - plotHeight) / 2,
+        width: plotWidth,
+        height: plotHeight,
+        scale
+      };
+    }
+
+    function toScreen(plot, x, y, s) {
+      return {
+        x: plot.x + (x - s.xMin) * plot.scale,
+        y: plot.y + (s.yMax - y) * plot.scale
+      };
+    }
+
+    function colorFor(value, scale) {
+      const t = clamp(0.5 + value / (2 * scale || 1), 0, 1);
+      for (let i = 1; i < COLOR_STOPS.length; i += 1) {
+        const left = COLOR_STOPS[i - 1];
+        const right = COLOR_STOPS[i];
+        if (t <= right.t) {
+          const span = right.t - left.t || 1;
+          const q = (t - left.t) / span;
+          const r = Math.round(left.c[0] + (right.c[0] - left.c[0]) * q);
+          const g = Math.round(left.c[1] + (right.c[1] - left.c[1]) * q);
+          const b = Math.round(left.c[2] + (right.c[2] - left.c[2]) * q);
+          return [r, g, b];
+        }
+      }
+      return COLOR_STOPS[COLOR_STOPS.length - 1].c;
+    }
+
+    function drawHeatmap(ctx, plot, s) {
+      const image = ctx.createImageData(s.nx, s.ny);
+      for (let j = 0; j < s.ny; j += 1) {
+        const targetRow = s.ny - 1 - j;
+        for (let i = 0; i < s.nx; i += 1) {
+          const source = index(i, j, s.nx);
+          const target = (targetRow * s.nx + i) * 4;
+          const rgb = colorFor(s.v[source], s.displayScale);
+          image.data[target] = rgb[0];
+          image.data[target + 1] = rgb[1];
+          image.data[target + 2] = rgb[2];
+          image.data[target + 3] = 232;
+        }
+      }
+
+      const offscreen = document.createElement("canvas");
+      offscreen.width = s.nx;
+      offscreen.height = s.ny;
+      const offscreenCtx = offscreen.getContext("2d");
+      offscreenCtx.putImageData(image, 0, 0);
+      ctx.save();
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(offscreen, plot.x, plot.y, plot.width, plot.height);
+      ctx.restore();
+    }
+
+    function edgeCrossing(level, p1, p2) {
+      const crosses = (p1.v < level && p2.v >= level) || (p1.v >= level && p2.v < level);
+      if (!crosses) {
+        return null;
+      }
+      const t = (level - p1.v) / (p2.v - p1.v || 1);
+      return {
+        x: p1.x + (p2.x - p1.x) * t,
+        y: p1.y + (p2.y - p1.y) * t
+      };
+    }
+
+    function addContourSegment(ctx, plot, s, p1, p2) {
+      const a = toScreen(plot, p1.x, p1.y, s);
+      const b = toScreen(plot, p2.x, p2.y, s);
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+    }
+
+    function cellIsMasked(points, s) {
+      return points.some((p) => {
+        const inConductor = Math.hypot(p.x, p.y) <= RADIUS + CONDUCTOR_MARGIN;
+        const nearRealCharge = Math.hypot(p.x - s.distance, p.y) < 0.085;
+        return inConductor || nearRealCharge;
+      });
+    }
+
+    function drawContours(ctx, plot, s, levelCount) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = "rgba(214, 86, 69, 0.76)";
+      ctx.lineWidth = 1.05;
+
+      for (let levelIndex = 1; levelIndex <= levelCount; levelIndex += 1) {
+        const level = -s.displayScale + 2 * s.displayScale * levelIndex / (levelCount + 1);
+        if (Math.abs(level - s.spherePotential) < s.displayScale / (levelCount + 1) * 0.22) {
+          continue;
+        }
+
+        for (let j = 0; j < s.ny - 1; j += 1) {
+          const y0 = s.yMin + j * s.dy;
+          const y1 = y0 + s.dy;
+          for (let i = 0; i < s.nx - 1; i += 1) {
+            const x0 = s.xMin + i * s.dx;
+            const x1 = x0 + s.dx;
+            const p00 = { x: x0, y: y0, v: s.v[index(i, j, s.nx)] };
+            const p10 = { x: x1, y: y0, v: s.v[index(i + 1, j, s.nx)] };
+            const p11 = { x: x1, y: y1, v: s.v[index(i + 1, j + 1, s.nx)] };
+            const p01 = { x: x0, y: y1, v: s.v[index(i, j + 1, s.nx)] };
+            const corners = [p00, p10, p11, p01];
+            if (cellIsMasked(corners, s)) {
+              continue;
+            }
+
+            const hits = [
+              edgeCrossing(level, p00, p10),
+              edgeCrossing(level, p10, p11),
+              edgeCrossing(level, p11, p01),
+              edgeCrossing(level, p01, p00)
+            ].filter(Boolean);
+
+            if (hits.length === 2) {
+              addContourSegment(ctx, plot, s, hits[0], hits[1]);
+            } else if (hits.length === 4) {
+              addContourSegment(ctx, plot, s, hits[0], hits[1]);
+              addContourSegment(ctx, plot, s, hits[2], hits[3]);
+            }
+          }
+        }
+      }
+
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawArrowHead(ctx, x, y, angle, size) {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x - size * Math.cos(angle - 0.55), y - size * Math.sin(angle - 0.55));
+      ctx.moveTo(x, y);
+      ctx.lineTo(x - size * Math.cos(angle + 0.55), y - size * Math.sin(angle + 0.55));
+      ctx.stroke();
+    }
+
+    function drawFieldVectors(ctx, plot, s) {
+      const columns = s.vectors + 4;
+      const rows = Math.max(8, Math.round(columns * s.height / s.width));
+      const xStep = s.width / (columns - 1);
+      const yStep = s.height / (rows - 1);
+      ctx.save();
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      for (let j = 0; j < rows; j += 1) {
+        const y = s.yMin + j * yStep;
+        for (let i = 0; i < columns; i += 1) {
+          const x = s.xMin + i * xStep;
+          if (Math.hypot(x, y) <= RADIUS + 0.08 || Math.hypot(x - s.distance, y) < 0.20) {
+            continue;
+          }
+
+          const field = fieldAtPoint(x, y, s, { display: true });
+          const magnitude = Math.hypot(field.ex, field.ey);
+          if (magnitude < 1e-5) {
+            continue;
+          }
+
+          const screen = toScreen(plot, x, y, s);
+          const angle = Math.atan2(-field.ey, field.ex);
+          const strength = clamp(magnitude / s.vectorScale, 0, 1);
+          const length = (0.035 + 0.080 * strength) * plot.scale;
+          const half = length * 0.5;
+          const x0 = screen.x - Math.cos(angle) * half;
+          const y0 = screen.y - Math.sin(angle) * half;
+          const x1 = screen.x + Math.cos(angle) * half;
+          const y1 = screen.y + Math.sin(angle) * half;
+          ctx.strokeStyle = "rgba(29, 100, 216, " + (0.28 + 0.50 * strength).toFixed(3) + ")";
+          ctx.lineWidth = 1.05 + 0.60 * strength;
+          ctx.beginPath();
+          ctx.moveTo(x0, y0);
+          ctx.lineTo(x1, y1);
+          ctx.stroke();
+          drawArrowHead(ctx, x1, y1, angle, 4.2 + 2.8 * strength);
+        }
+      }
+
+      ctx.restore();
+    }
+
+    function roundedRect(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    function labelPill(ctx, text, x, y, options = {}) {
+      ctx.save();
+      ctx.font = "600 12px Inter, system-ui, sans-serif";
+      const metrics = ctx.measureText(text);
+      const width = metrics.width + 16;
+      const height = 25;
+      roundedRect(ctx, x - width / 2, y - height / 2, width, height, 7);
+      ctx.fillStyle = options.fill || "rgba(255, 255, 255, 0.90)";
+      ctx.strokeStyle = options.stroke || "rgba(216, 224, 234, 0.95)";
+      ctx.lineWidth = 1;
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = options.color || "#263047";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, x, y + 0.5);
+      ctx.restore();
+    }
+
+    function drawSphere(ctx, plot, s) {
+      const center = toScreen(plot, 0, 0, s);
+      const radius = RADIUS * plot.scale;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.84)";
+      ctx.fill();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "rgba(38, 48, 71, 0.54)";
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(center.x - radius, center.y);
+      ctx.lineTo(center.x + radius, center.y);
+      ctx.strokeStyle = "rgba(38, 48, 71, 0.20)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5, 5]);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawSurfaceCharge(ctx, plot, s) {
+      const center = toScreen(plot, 0, 0, s);
+      const radius = RADIUS * plot.scale;
+      const scale = Math.max(Math.abs(s.minSigma), Math.abs(s.maxSigma), 1e-9);
+      const segments = 144;
+      const segmentAngle = Math.PI * 2 / segments;
+      ctx.save();
+      ctx.lineCap = "round";
+      ctx.setLineDash([]);
+
+      for (let i = 0; i < segments; i += 1) {
+        const theta = (i + 0.5) * segmentAngle;
+        const sigma = surfaceSigma(theta, s);
+        const strength = clamp(Math.abs(sigma) / scale, 0, 1);
+        const alpha = 0.34 + 0.58 * strength;
+        ctx.lineWidth = 2.1 + 7.2 * strength;
+        ctx.strokeStyle = sigma >= 0 ? "rgba(180, 45, 130, " + alpha.toFixed(3) + ")" : "rgba(12, 136, 145, " + alpha.toFixed(3) + ")";
+        ctx.beginPath();
+        ctx.arc(center.x, center.y, radius, i * segmentAngle - 0.006, (i + 1) * segmentAngle + 0.006);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawCharge(ctx, plot, s, charge, x, y, options = {}) {
+      const p = toScreen(plot, x, y, s);
+      const positive = charge >= 0;
+      const absCharge = Math.min(1.8, Math.abs(charge));
+      const radius = options.radius || (7.5 + 2.2 * Math.sqrt(absCharge));
+      ctx.save();
+      if (options.dashed) {
+        ctx.setLineDash([4, 4]);
+      }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = positive ? "rgba(180, 45, 130, 0.88)" : "rgba(12, 136, 145, 0.88)";
+      ctx.strokeStyle = options.stroke || "rgba(255, 255, 255, 0.96)";
+      ctx.lineWidth = options.dashed ? 2 : 2.4;
+      if (Math.abs(charge) < 0.01) {
+        ctx.fillStyle = "rgba(97, 112, 137, 0.62)";
+      }
+      ctx.fill();
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.96)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(p.x - radius * 0.42, p.y);
+      ctx.lineTo(p.x + radius * 0.42, p.y);
+      if (positive && Math.abs(charge) >= 0.01) {
+        ctx.moveTo(p.x, p.y - radius * 0.42);
+        ctx.lineTo(p.x, p.y + radius * 0.42);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      if (options.label) {
+        labelPill(ctx, options.label, p.x + (options.labelDx || 0), p.y + (options.labelDy || -27), options.labelOptions || {});
+      }
+    }
+
+    function drawImages(ctx, plot, s) {
+      const params = s.params;
+      const imageLabel = "q' = " + formatSigned(params.imageCharge, 2);
+      drawCharge(ctx, plot, s, params.imageCharge, params.imagePosition, 0, {
+        radius: 7.4,
+        dashed: true,
+        stroke: "rgba(111, 85, 199, 0.80)",
+        label: imageLabel,
+        labelDy: -27,
+        labelOptions: {
+          fill: "rgba(255, 255, 255, 0.84)",
+          stroke: "rgba(111, 85, 199, 0.45)",
+          color: "#443586"
+        }
+      });
+
+      if (Math.abs(params.centralCharge) >= 0.015) {
+        drawCharge(ctx, plot, s, params.centralCharge, 0, 0, {
+          radius: 6.4,
+          dashed: true,
+          stroke: "rgba(111, 85, 199, 0.80)",
+          label: "Q0 = " + formatSigned(params.centralCharge, 2),
+          labelDx: -54,
+          labelDy: 34,
+          labelOptions: {
+            fill: "rgba(255, 255, 255, 0.84)",
+            stroke: "rgba(111, 85, 199, 0.45)",
+            color: "#443586"
+          }
+        });
+      }
+    }
+
+    function drawRealCharge(ctx, plot, s) {
+      drawCharge(ctx, plot, s, s.charge, s.distance, 0, {
+        label: "q = " + formatSigned(s.charge, 2),
+        labelDx: 18,
+        labelDy: -28
+      });
+    }
+
+    function drawAnnotations(ctx, plot, s) {
+      const center = toScreen(plot, 0, 0, s);
+      const real = toScreen(plot, s.distance, 0, s);
+      const image = toScreen(plot, s.params.imagePosition, 0, s);
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(38, 48, 71, 0.42)";
+      ctx.fillStyle = "rgba(38, 48, 71, 0.66)";
+      ctx.lineWidth = 1.4;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(center.x, center.y);
+      ctx.lineTo(real.x, real.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.font = "700 12px Inter, system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.fillText("x", real.x + 14, real.y + 10);
+      ctx.restore();
+
+      labelPill(ctx, "R = 1", center.x, center.y + RADIUS * plot.scale + 30);
+      labelPill(ctx, "x' = R^2/d", image.x, image.y + 30, {
+        fill: "rgba(255, 255, 255, 0.84)",
+        stroke: "rgba(111, 85, 199, 0.42)",
+        color: "#443586"
+      });
+    }
+
+    function drawPlotFrame(ctx, plot, s) {
+      ctx.save();
+      ctx.strokeStyle = "rgba(38, 48, 71, 0.18)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(plot.x, plot.y, plot.width, plot.height);
+      ctx.fillStyle = "rgba(38, 48, 71, 0.58)";
+      ctx.font = "600 11px Inter, system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      const left = toScreen(plot, s.xMin, 0, s);
+      const right = toScreen(plot, s.xMax, 0, s);
+      ctx.direction = "rtl";
+      ctx.fillText("ציר דרך המטען ומרכז הכדור", (left.x + right.x) / 2, plot.y + plot.height + 13);
+      ctx.restore();
+    }
+
+    function draw() {
+      updateControlText();
+      const s = state.solution;
+      if (!s) {
+        return;
+      }
+
+      const { ctx, width, height } = canvasSize();
+      const plot = plotBox(width, height, s.width, s.height);
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#f8fafc";
+      ctx.fillRect(0, 0, width, height);
+
+      if (s.showHeat) {
+        drawHeatmap(ctx, plot, s);
+      } else {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(plot.x, plot.y, plot.width, plot.height);
+      }
+
+      if (s.showContours) {
+        drawContours(ctx, plot, s, s.levels);
+      }
+
+      if (s.showVectors) {
+        drawFieldVectors(ctx, plot, s);
+      }
+
+      drawSphere(ctx, plot, s);
+
+      if (s.showSurfaceCharge) {
+        drawSurfaceCharge(ctx, plot, s);
+      }
+
+      if (s.showImages) {
+        drawImages(ctx, plot, s);
+      }
+
+      drawRealCharge(ctx, plot, s);
+      drawPlotFrame(ctx, plot, s);
+      drawAnnotations(ctx, plot, s);
+    }
+
+    function scheduleRecompute() {
+      window.clearTimeout(state.recomputeTimer);
+      updateControlText();
+      state.recomputeTimer = window.setTimeout(buildSolution, 20);
+    }
+
+    function resetDefaults() {
+      refs.charge.value = DEFAULTS.charge.toFixed(2);
+      refs.distance.value = DEFAULTS.distance.toFixed(2);
+      refs.spherePotential.value = DEFAULTS.spherePotential.toFixed(2);
+      refs.resolution.value = DEFAULTS.resolution;
+      refs.levels.value = String(DEFAULTS.levels);
+      refs.vectors.value = String(DEFAULTS.vectors);
+      refs.showHeat.checked = DEFAULTS.showHeat;
+      refs.showContours.checked = DEFAULTS.showContours;
+      refs.showVectors.checked = DEFAULTS.showVectors;
+      refs.showSurfaceCharge.checked = DEFAULTS.showSurfaceCharge;
+      refs.showImages.checked = DEFAULTS.showImages;
+      scheduleRecompute();
+    }
+
+    [
+      refs.charge,
+      refs.distance,
+      refs.spherePotential,
+      refs.resolution
+    ].forEach((control) => control.addEventListener("input", scheduleRecompute));
+
+    refs.levels.addEventListener("input", () => {
+      updateControlText();
+      if (state.solution) {
+        state.solution.levels = Number(refs.levels.value);
+      }
+      draw();
+    });
+
+    refs.vectors.addEventListener("input", () => {
+      updateControlText();
+      if (state.solution) {
+        state.solution.vectors = Number(refs.vectors.value);
+      }
+      draw();
+    });
+
+    refs.showHeat.addEventListener("change", () => {
+      if (state.solution) state.solution.showHeat = refs.showHeat.checked;
+      draw();
+    });
+    refs.showContours.addEventListener("change", () => {
+      if (state.solution) state.solution.showContours = refs.showContours.checked;
+      draw();
+    });
+    refs.showVectors.addEventListener("change", () => {
+      if (state.solution) state.solution.showVectors = refs.showVectors.checked;
+      draw();
+    });
+    refs.showSurfaceCharge.addEventListener("change", () => {
+      if (state.solution) state.solution.showSurfaceCharge = refs.showSurfaceCharge.checked;
+      draw();
+    });
+    refs.showImages.addEventListener("change", () => {
+      if (state.solution) state.solution.showImages = refs.showImages.checked;
+      draw();
+    });
+    refs.redraw.addEventListener("click", buildSolution);
+    refs.defaults.addEventListener("click", resetDefaults);
+
+    if ("ResizeObserver" in window) {
+      const observer = new ResizeObserver(draw);
+      observer.observe(refs.canvas);
+    } else {
+      window.addEventListener("resize", draw);
+    }
+
+    resetDefaults();
+  </script>
+</body>
+</html>

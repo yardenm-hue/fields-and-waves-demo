@@ -135,17 +135,56 @@
 
     .layout {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 330px;
+      grid-template-columns: 220px minmax(0, 1fr) 330px;
       gap: 18px;
       align-items: start;
     }
 
+    .layout.instructions-hidden {
+      grid-template-columns: minmax(0, 1fr) 330px;
+    }
+
+    .instructions,
     .chart-panel,
     .controls {
       border: 1px solid var(--line);
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.92);
       box-shadow: var(--shadow);
+    }
+
+    .instructions {
+      position: sticky;
+      top: 16px;
+      min-width: 0;
+      padding: 16px;
+    }
+
+    .instructions-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .instructions p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .instructions-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      width: 28px;
+      min-height: 28px;
+      padding: 0;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1;
     }
 
     .chart-panel {
@@ -527,6 +566,10 @@
         grid-template-columns: 1fr;
       }
 
+      .layout.instructions-hidden {
+        grid-template-columns: 1fr;
+      }
+
       .header-actions {
         justify-content: flex-start;
       }
@@ -536,6 +579,10 @@
       }
 
       .controls {
+        position: static;
+      }
+
+      .instructions {
         position: static;
       }
     }
@@ -591,6 +638,14 @@
     </header>
 
     <section class="layout">
+      <aside id="instructionsPanel" class="instructions" aria-label="הוראות">
+        <div class="instructions-header">
+          <h2>הוראות</h2>
+          <button id="instructionsClose" class="instructions-close" type="button" aria-label="סגירת הוראות">x</button>
+        </div>
+        <p>לחצו כדי להציב נקודה על התרשים, ואז לחצו עליה כדי לבצע טרנספורמציות שונות.</p>
+      </aside>
+
       <section class="chart-panel" aria-label="מרחב העבודה של תרשים סמית">
         <div class="plot-toolbar">
           <div class="legend" aria-label="מקרא מסלולים">
@@ -753,6 +808,10 @@
     document.getElementById("undoBtn").addEventListener("click", undoLast);
     document.getElementById("resetBtn").addEventListener("click", clearChart);
     document.getElementById("exportBtn").addEventListener("click", exportPNG);
+    document.getElementById("instructionsClose").addEventListener("click", () => {
+      document.getElementById("instructionsPanel").hidden = true;
+      document.querySelector(".layout").classList.add("instructions-hidden");
+    });
 
     function drawSmith() {
       gridLayer.innerHTML = "";

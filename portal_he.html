@@ -135,9 +135,20 @@
       letter-spacing: 0;
     }
 
-    .demo-grid {
+    .portal-columns {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+
+    .portal-columns section {
+      min-width: 0;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr;
       gap: 16px;
     }
 
@@ -251,6 +262,10 @@
       --accent: var(--violet);
     }
 
+    .images {
+      --accent: var(--green);
+    }
+
     .fields {
       --section-accent: var(--coral);
     }
@@ -272,6 +287,7 @@
         justify-content: flex-start;
       }
 
+      .portal-columns,
       .demo-grid {
         grid-template-columns: 1fr;
       }
@@ -322,17 +338,18 @@
         <p class="subtitle">פורטל מרוכז לכל ההדגמות האינטראקטיביות שאנחנו בונים יחד: קווי תמסורת, התאמת עכבות, גלים עומדים, בעיות ערכי שפה אלקטרוסטטיות וחומרים דיאלקטריים.</p>
       </div>
       <div class="meta" aria-label="בקרות הפורטל">
-        <span class="pill">5 הדגמות</span>
+        <span class="pill">6 הדגמות</span>
         <a class="language-link" href="portal.html" lang="en" dir="ltr">English</a>
       </div>
     </header>
 
-    <section aria-labelledby="waves-title">
-      <div class="section-heading">
-        <h2 id="waves-title">קווי תמסורת וגלים</h2>
-      </div>
-      <div class="demo-grid">
-        <a class="demo-card wave" href="vswr_demo_he.html">
+    <div class="portal-columns">
+      <section aria-labelledby="waves-title">
+        <div class="section-heading">
+          <h2 id="waves-title">קווי תמסורת וגלים</h2>
+        </div>
+        <div class="demo-grid">
+          <a class="demo-card wave" href="vswr_demo_he.html">
           <span class="card-body">
             <span class="kicker">גלים עומדים</span>
             <h3>יחס גל עומד במתח</h3>
@@ -351,9 +368,9 @@
               <circle cx="258" cy="188" r="8" fill="#ffffff" stroke="#d65645" stroke-width="4"></circle>
             </svg>
           </span>
-        </a>
+          </a>
 
-        <a class="demo-card line" href="shorted_line_fields_he.html">
+          <a class="demo-card line" href="shorted_line_fields_he.html">
           <span class="card-body">
             <span class="kicker">קו מקוצר</span>
             <h3>שדות בקו תמסורת מקוצר</h3>
@@ -373,9 +390,9 @@
               <circle cx="42" cy="174" r="11" fill="#ffffff" stroke="#b77900" stroke-width="5"></circle>
             </svg>
           </span>
-        </a>
+          </a>
 
-        <a class="demo-card match" href="smith_chart_he.html">
+          <a class="demo-card match" href="smith_chart_he.html">
           <span class="card-body">
             <span class="kicker">התאמת עכבות</span>
             <h3>כלי התאמה בתרשים סמית</h3>
@@ -398,16 +415,17 @@
               <circle cx="235" cy="126" r="8" fill="#ffffff" stroke="#12866f" stroke-width="5"></circle>
             </svg>
           </span>
-        </a>
-      </div>
-    </section>
+          </a>
 
-    <section class="fields" aria-labelledby="fields-title">
-      <div class="section-heading">
-        <h2 id="fields-title">שדות אלקטרוסטטיים</h2>
-      </div>
-      <div class="demo-grid">
-        <a class="demo-card box" href="electrostatic_box_fields_he.html">
+        </div>
+      </section>
+
+      <section class="fields" aria-labelledby="fields-title">
+        <div class="section-heading">
+          <h2 id="fields-title">שדות סטטיים</h2>
+        </div>
+        <div class="demo-grid">
+          <a class="demo-card box" href="electrostatic_box_fields_he.html">
           <span class="card-body">
             <span class="kicker">ערכי שפה</span>
             <h3>שדות אלקטרוסטטיים בתיבה דו-ממדית</h3>
@@ -426,9 +444,9 @@
               <path d="M224 64 C274 96 274 154 224 186" fill="none" stroke="#1d64d8" stroke-width="4" stroke-linecap="round" opacity="0.82"></path>
             </svg>
           </span>
-        </a>
+          </a>
 
-        <a class="demo-card sphere" href="dielectric_sphere_fields_he.html">
+          <a class="demo-card sphere" href="dielectric_sphere_fields_he.html">
           <span class="card-body">
             <span class="kicker">תווך דיאלקטרי</span>
             <h3>שדות סביב כדור דיאלקטרי</h3>
@@ -448,9 +466,34 @@
               <path d="M180 59 C203 91 203 159 180 191 C157 159 157 91 180 59" fill="none" stroke="#6f55c7" stroke-width="4" stroke-linecap="round" opacity="0.75"></path>
             </svg>
           </span>
-        </a>
-      </div>
-    </section>
+          </a>
+
+          <a class="demo-card images" href="conducting_sphere_images_he.html">
+          <span class="card-body">
+            <span class="kicker">מטענים מדומים</span>
+            <h3>מטען נקודתי ליד כדור מוליך</h3>
+            <p>הזיזו מטען נקודתי ליד כדור מוליך, קבעו את פוטנציאל הכדור, והשוו בין מטען פני השטח האמיתי לבין בניית המטענים המדומים.</p>
+            <span class="equation">q' = -(R/d)q, x' = R<sup>2</sup>/d</span>
+            <span class="open-label">פתיחת הדגמה &larr;</span>
+          </span>
+          <span class="thumb" aria-hidden="true">
+            <svg viewBox="0 0 360 250" focusable="false">
+              <rect width="360" height="250" fill="#f8fbff"></rect>
+              <path d="M38 72 C92 58 124 72 148 105 S194 164 250 145 S319 126 334 168" fill="none" stroke="#d65645" stroke-width="4" stroke-linecap="round" opacity="0.75"></path>
+              <path d="M42 178 C104 156 130 154 158 176 S219 207 278 178" fill="none" stroke="#1d64d8" stroke-width="4" stroke-linecap="round" opacity="0.78"></path>
+              <circle cx="145" cy="125" r="62" fill="#ffffff" stroke="#12866f" stroke-width="7"></circle>
+              <path d="M85 112 A62 62 0 0 1 178 72" fill="none" stroke="#0c8891" stroke-width="8" stroke-linecap="round"></path>
+              <path d="M190 94 A62 62 0 0 1 186 160" fill="none" stroke="#b42d82" stroke-width="8" stroke-linecap="round"></path>
+              <path d="M60 125 H286" stroke="#7d8999" stroke-width="3" stroke-dasharray="8 8" opacity="0.72"></path>
+              <circle cx="205" cy="125" r="11" fill="#0c8891" stroke="#ffffff" stroke-width="4"></circle>
+              <circle cx="278" cy="125" r="14" fill="#b42d82" stroke="#ffffff" stroke-width="4"></circle>
+              <path d="M274 125 H282 M278 121 V129" stroke="#ffffff" stroke-width="3" stroke-linecap="round"></path>
+            </svg>
+          </span>
+          </a>
+        </div>
+      </section>
+    </div>
 
     <footer>
       הדגמות שדות וגלים אלקטרומגנטיים | פורטל עברי

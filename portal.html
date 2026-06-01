@@ -132,9 +132,20 @@
       letter-spacing: 0;
     }
 
-    .demo-grid {
+    .portal-columns {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+
+    .portal-columns section {
+      min-width: 0;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr;
       gap: 16px;
     }
 
@@ -245,6 +256,10 @@
       --accent: var(--violet);
     }
 
+    .images {
+      --accent: var(--green);
+    }
+
     .fields {
       --section-accent: var(--coral);
     }
@@ -266,6 +281,7 @@
         justify-content: flex-start;
       }
 
+      .portal-columns,
       .demo-grid {
         grid-template-columns: 1fr;
       }
@@ -312,17 +328,18 @@
         <p class="subtitle">A compact portal for the interactive demonstrations we are building together: transmission lines, impedance matching, standing waves, electrostatic boundary-value problems, and dielectric media.</p>
       </div>
       <div class="meta" aria-label="Portal controls">
-        <span class="pill">5 demonstrations</span>
+        <span class="pill">6 demonstrations</span>
         <a class="language-link" href="portal_he.html" lang="he" dir="rtl">עברית</a>
       </div>
     </header>
 
-    <section aria-labelledby="waves-title">
-      <div class="section-heading">
-        <h2 id="waves-title">Transmission Lines and Waves</h2>
-      </div>
-      <div class="demo-grid">
-        <a class="demo-card wave" href="vswr_demo.html">
+    <div class="portal-columns">
+      <section aria-labelledby="waves-title">
+        <div class="section-heading">
+          <h2 id="waves-title">Transmission Lines and Waves</h2>
+        </div>
+        <div class="demo-grid">
+          <a class="demo-card wave" href="vswr_demo.html">
           <span class="thumb" aria-hidden="true">
             <svg viewBox="0 0 360 250" focusable="false">
               <rect width="360" height="250" fill="#f8fbff"></rect>
@@ -341,9 +358,9 @@
             <span class="equation">VSWR = (1 + |&Gamma;|) / (1 - |&Gamma;|)</span>
             <span class="open-label">Open demo &rarr;</span>
           </span>
-        </a>
+          </a>
 
-        <a class="demo-card line" href="shorted_line_fields.html">
+          <a class="demo-card line" href="shorted_line_fields.html">
           <span class="thumb" aria-hidden="true">
             <svg viewBox="0 0 360 250" focusable="false">
               <rect width="360" height="250" fill="#f8fbff"></rect>
@@ -363,9 +380,9 @@
             <span class="equation">E(x)/E<sub>0</sub> = sin(&beta;x) / sin(&beta;L)</span>
             <span class="open-label">Open demo &rarr;</span>
           </span>
-        </a>
+          </a>
 
-        <a class="demo-card match" href="smith_chart.html">
+          <a class="demo-card match" href="smith_chart.html">
           <span class="thumb" aria-hidden="true">
             <svg viewBox="0 0 360 250" focusable="false">
               <rect width="360" height="250" fill="#f8fbff"></rect>
@@ -388,16 +405,16 @@
             <span class="equation">z = (1 + &Gamma;) / (1 - &Gamma;)</span>
             <span class="open-label">Open demo &rarr;</span>
           </span>
-        </a>
-      </div>
-    </section>
+          </a>
+        </div>
+      </section>
 
-    <section class="fields" aria-labelledby="fields-title">
-      <div class="section-heading">
-        <h2 id="fields-title">Electrostatic Fields</h2>
-      </div>
-      <div class="demo-grid">
-        <a class="demo-card box" href="electrostatic_box_fields.html">
+      <section class="fields" aria-labelledby="fields-title">
+        <div class="section-heading">
+          <h2 id="fields-title">Static Fields</h2>
+        </div>
+        <div class="demo-grid">
+          <a class="demo-card box" href="electrostatic_box_fields.html">
           <span class="thumb" aria-hidden="true">
             <svg viewBox="0 0 360 250" focusable="false">
               <rect width="360" height="250" fill="#f8fbff"></rect>
@@ -416,9 +433,9 @@
             <span class="equation">&nabla;<sup>2</sup>V = 0, E = -grad V</span>
             <span class="open-label">Open demo &rarr;</span>
           </span>
-        </a>
+          </a>
 
-        <a class="demo-card sphere" href="dielectric_sphere_fields.html">
+          <a class="demo-card sphere" href="dielectric_sphere_fields.html">
           <span class="thumb" aria-hidden="true">
             <svg viewBox="0 0 360 250" focusable="false">
               <rect width="360" height="250" fill="#f8fbff"></rect>
@@ -438,9 +455,34 @@
             <span class="equation">&beta; = (&epsilon;<sub>s</sub> - &epsilon;<sub>m</sub>) / (&epsilon;<sub>s</sub> + 2&epsilon;<sub>m</sub>)</span>
             <span class="open-label">Open demo &rarr;</span>
           </span>
-        </a>
-      </div>
-    </section>
+          </a>
+
+          <a class="demo-card images" href="conducting_sphere_images.html">
+          <span class="thumb" aria-hidden="true">
+            <svg viewBox="0 0 360 250" focusable="false">
+              <rect width="360" height="250" fill="#f8fbff"></rect>
+              <path d="M38 72 C92 58 124 72 148 105 S194 164 250 145 S319 126 334 168" fill="none" stroke="#d65645" stroke-width="4" stroke-linecap="round" opacity="0.75"></path>
+              <path d="M42 178 C104 156 130 154 158 176 S219 207 278 178" fill="none" stroke="#1d64d8" stroke-width="4" stroke-linecap="round" opacity="0.78"></path>
+              <circle cx="145" cy="125" r="62" fill="#ffffff" stroke="#12866f" stroke-width="7"></circle>
+              <path d="M85 112 A62 62 0 0 1 178 72" fill="none" stroke="#0c8891" stroke-width="8" stroke-linecap="round"></path>
+              <path d="M190 94 A62 62 0 0 1 186 160" fill="none" stroke="#b42d82" stroke-width="8" stroke-linecap="round"></path>
+              <path d="M60 125 H286" stroke="#7d8999" stroke-width="3" stroke-dasharray="8 8" opacity="0.72"></path>
+              <circle cx="205" cy="125" r="11" fill="#0c8891" stroke="#ffffff" stroke-width="4"></circle>
+              <circle cx="278" cy="125" r="14" fill="#b42d82" stroke="#ffffff" stroke-width="4"></circle>
+              <path d="M274 125 H282 M278 121 V129" stroke="#ffffff" stroke-width="3" stroke-linecap="round"></path>
+            </svg>
+          </span>
+          <span class="card-body">
+            <span class="kicker">Image charges</span>
+            <h3>Conducting Sphere Images</h3>
+            <p>Move a point charge near a conducting sphere, set the sphere potential, and compare the real surface charge with its image-charge construction.</p>
+            <span class="equation">q' = -(R/d)q, x' = R<sup>2</sup>/d</span>
+            <span class="open-label">Open demo &rarr;</span>
+          </span>
+          </a>
+        </div>
+      </section>
+    </div>
 
     <footer>
       EM Fields and Waves Demonstrations | English portal
