@@ -233,6 +233,10 @@
       --accent: var(--teal);
     }
 
+    .match {
+      --accent: var(--amber);
+    }
+
     .box {
       --accent: var(--coral);
     }
@@ -305,10 +309,10 @@
     <header>
       <div>
         <h1>EM Fields and Waves Demonstrations</h1>
-        <p class="subtitle">A compact portal for the interactive demonstrations we are building together: transmission lines, standing waves, electrostatic boundary-value problems, and dielectric media.</p>
+        <p class="subtitle">A compact portal for the interactive demonstrations we are building together: transmission lines, impedance matching, standing waves, electrostatic boundary-value problems, and dielectric media.</p>
       </div>
       <div class="meta" aria-label="Portal controls">
-        <span class="pill">4 demonstrations</span>
+        <span class="pill">5 demonstrations</span>
         <a class="language-link" href="portal_he.html" lang="he" dir="rtl">עברית</a>
       </div>
     </header>
@@ -357,6 +361,31 @@
             <h3>Shorted Transmission Line Fields</h3>
             <p>Move the source distance and watch the electric-field and magnetic-field standing-wave amplitudes between the source and the short.</p>
             <span class="equation">E(x)/E<sub>0</sub> = sin(&beta;x) / sin(&beta;L)</span>
+            <span class="open-label">Open demo &rarr;</span>
+          </span>
+        </a>
+
+        <a class="demo-card match" href="smith_chart.html">
+          <span class="thumb" aria-hidden="true">
+            <svg viewBox="0 0 360 250" focusable="false">
+              <rect width="360" height="250" fill="#f8fbff"></rect>
+              <circle cx="180" cy="125" r="82" fill="#ffffff" stroke="#6f7788" stroke-width="5"></circle>
+              <path d="M98 125 H262" stroke="#7d8999" stroke-width="3" stroke-linecap="round"></path>
+              <circle cx="221" cy="125" r="41" fill="none" stroke="#ccd7e6" stroke-width="3"></circle>
+              <circle cx="207" cy="125" r="55" fill="none" stroke="#ccd7e6" stroke-width="3"></circle>
+              <path d="M262 69 A74 74 0 0 0 262 181" fill="none" stroke="#1d64d8" stroke-width="4" stroke-linecap="round"></path>
+              <path d="M262 181 A74 74 0 0 1 262 69" fill="none" stroke="#d65645" stroke-width="4" stroke-linecap="round" opacity="0.75"></path>
+              <circle cx="180" cy="125" r="50" fill="none" stroke="#b77900" stroke-width="4" stroke-dasharray="8 8"></circle>
+              <path d="M128 151 C152 96 201 95 235 126" fill="none" stroke="#12866f" stroke-width="7" stroke-linecap="round"></path>
+              <circle cx="128" cy="151" r="8" fill="#ffffff" stroke="#d65645" stroke-width="5"></circle>
+              <circle cx="235" cy="126" r="8" fill="#ffffff" stroke="#12866f" stroke-width="5"></circle>
+            </svg>
+          </span>
+          <span class="card-body">
+            <span class="kicker">Impedance matching</span>
+            <h3>Smith Chart Matching Tool</h3>
+            <p>Place normalized impedance points and track constant-resistance, constant-reactance, and constant-|&Gamma;| moves.</p>
+            <span class="equation">z = (1 + &Gamma;) / (1 - &Gamma;)</span>
             <span class="open-label">Open demo &rarr;</span>
           </span>
         </a>
@@ -415,6 +444,9 @@
 
     <footer>
       EM Fields and Waves Demonstrations | English portal
+      <div dir="ltr" style="margin-top: 8px;">
+        created by <a href="https://wavetheory.group" style="color: var(--blue); font-weight: 700;">Yarden Mazor</a>, School of ECE, Tel-Aviv University
+      </div>
     </footer>
   </main>
 </body>

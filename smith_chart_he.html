@@ -1,0 +1,1127 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>הדגמת התאמת עכבות בתרשים סמית</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #617089;
+      --line: #d8e0ea;
+      --blue: #1d64d8;
+      --teal: #0f8f83;
+      --coral: #d65645;
+      --amber: #b77900;
+      --violet: #6f55c7;
+      --green: #12866f;
+      --shadow: 0 18px 45px rgba(29, 44, 73, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      direction: rtl;
+      text-align: right;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        linear-gradient(180deg, rgba(246, 248, 251, 0.98), rgba(235, 241, 248, 0.96)),
+        radial-gradient(circle at 80% 8%, rgba(111, 85, 199, 0.11), transparent 32%),
+        radial-gradient(circle at 9% 18%, rgba(15, 143, 131, 0.12), transparent 30%);
+      color: var(--ink);
+    }
+
+    main {
+      width: min(1260px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 26px 0 34px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: end;
+      padding: 4px 0 18px;
+    }
+
+    header > div,
+    .plot-title {
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.85rem, 3.5vw, 3.05rem);
+      line-height: 1.03;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 780px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.55;
+      overflow-wrap: break-word;
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: flex-end;
+      justify-content: flex-start;
+    }
+
+    .portal-link,
+    .language-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      margin-top: 14px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 8px 24px rgba(29, 44, 73, 0.08);
+      color: var(--blue);
+      font-size: 0.93rem;
+      font-weight: 700;
+      line-height: 1.2;
+      text-decoration: none;
+    }
+
+    .portal-link:hover,
+    .language-link:hover {
+      border-color: rgba(29, 100, 216, 0.45);
+      background: #ffffff;
+    }
+
+    .portal-link:focus-visible,
+    .language-link:focus-visible,
+    button:focus-visible,
+    input:focus-visible {
+      outline: 3px solid rgba(29, 100, 216, 0.34);
+      outline-offset: 3px;
+    }
+
+    .formula {
+      max-width: 410px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 8px 24px rgba(29, 44, 73, 0.08);
+      color: #24324a;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.86rem;
+      line-height: 1.45;
+      direction: ltr;
+      text-align: left;
+      unicode-bidi: isolate;
+      white-space: nowrap;
+      overflow-wrap: anywhere;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .chart-panel,
+    .controls {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow);
+    }
+
+    .chart-panel {
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .plot-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 1rem;
+    }
+
+    .plot-title p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.4;
+      overflow-wrap: break-word;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px 14px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .swatch {
+      width: 22px;
+      height: 3px;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+    .swatch.r {
+      background: var(--green);
+    }
+
+    .swatch.x {
+      background: var(--blue);
+    }
+
+    .swatch.g {
+      background: #526071;
+    }
+
+    .swatch.y {
+      background: var(--amber);
+    }
+
+    .chart-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: clamp(430px, 66vh, 720px);
+      min-height: 0;
+      padding: 12px;
+      background: #fbfcfe;
+    }
+
+    svg {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      height: 100%;
+      border-radius: 6px;
+      background: #fbfcfe;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .grid-line {
+      fill: none;
+      stroke: #ccd7e6;
+      stroke-width: 0.003;
+    }
+
+    .axis {
+      stroke: #7a8798;
+      stroke-width: 0.005;
+    }
+
+    .unit-circle {
+      fill: none;
+      stroke: #6c7788;
+      stroke-width: 0.008;
+    }
+
+    .grid-label {
+      fill: #66768d;
+      font-size: 0.035px;
+      pointer-events: none;
+    }
+
+    .wtg-label {
+      fill: #7c8797;
+      font-size: 0.025px;
+      font-weight: 700;
+      pointer-events: none;
+    }
+
+    .wtg-tick {
+      stroke: #9aa8ba;
+      stroke-width: 0.003;
+    }
+
+    .temp-arc {
+      fill: none;
+      stroke-width: 0.004;
+      stroke-dasharray: 0.01;
+      opacity: 0.9;
+    }
+
+    .permanent-path {
+      fill: none;
+      stroke-width: 0.004;
+      opacity: 0.42;
+    }
+
+    .color-R {
+      stroke: #12866f;
+    }
+
+    .color-X {
+      stroke: #1d64d8;
+    }
+
+    .color-G {
+      stroke: #526071;
+    }
+
+    .highlight-circle {
+      fill: none;
+      stroke: #d65645;
+      stroke-width: 0.008;
+      opacity: 0;
+      transition: opacity 180ms ease;
+      pointer-events: none;
+    }
+
+    .highlight-active {
+      opacity: 0.72;
+    }
+
+    .admittance-grid {
+      fill: none;
+      stroke: #b77900;
+      stroke-width: 0.002;
+      pointer-events: none;
+    }
+
+    #admittance-layer {
+      opacity: 0;
+      transition: opacity 180ms ease;
+    }
+
+    .point {
+      fill: #d65645;
+      stroke: transparent;
+      stroke-width: 0.02;
+    }
+
+    .point.selected {
+      fill: #b77900;
+      stroke: #172033;
+      stroke-width: 0.01;
+    }
+
+    .p-label {
+      fill: #172033;
+      font-size: 0.03px;
+      font-weight: 800;
+      pointer-events: none;
+    }
+
+    #hud {
+      position: fixed;
+      z-index: 30;
+      display: none;
+      pointer-events: none;
+      padding: 8px 10px;
+      border: 1px solid rgba(29, 100, 216, 0.36);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 12px 30px rgba(29, 44, 73, 0.16);
+      color: #24324a;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .move-toolbar {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      z-index: 20;
+      display: none;
+      width: min(94%, 470px);
+      transform: translateX(-50%);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 12px 32px rgba(29, 44, 73, 0.16);
+      padding: 10px;
+    }
+
+    .move-toolbar .btn-group {
+      margin: 0;
+    }
+
+    .controls {
+      position: sticky;
+      top: 16px;
+      min-width: 0;
+      padding: 18px;
+    }
+
+    .control-panel {
+      padding: 14px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .control-panel:first-of-type {
+      margin-top: 12px;
+    }
+
+    .panel-title {
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      line-height: 1.2;
+      text-transform: uppercase;
+    }
+
+    .control-label {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+      margin: 10px 0;
+      color: #263047;
+      font-size: 0.92rem;
+      line-height: 1.35;
+      cursor: pointer;
+    }
+
+    .slider-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 10px 0 6px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .slider-label output {
+      color: #263047;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-weight: 700;
+    }
+
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--blue);
+      flex: 0 0 auto;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+    }
+
+    .btn-group {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      min-height: 38px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: #edf3f9;
+      color: #263047;
+      cursor: pointer;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    button:hover {
+      border-color: rgba(29, 100, 216, 0.28);
+      background: #ffffff;
+    }
+
+    button.active {
+      background: var(--blue);
+      color: #ffffff;
+    }
+
+    .btn-danger {
+      background: #fbeeea;
+      color: #9d3025;
+    }
+
+    .btn-warning {
+      background: #fff5dc;
+      color: #815700;
+    }
+
+    .btn-success {
+      width: 100%;
+      background: #e8f6f3;
+      color: #0d6d61;
+    }
+
+    .history-list {
+      max-height: min(38vh, 320px);
+      overflow-y: auto;
+      padding-left: 4px;
+    }
+
+    .history-item,
+    .empty-history {
+      margin-bottom: 9px;
+      padding: 9px 10px;
+      border: 1px solid rgba(216, 224, 234, 0.9);
+      border-right: 4px solid var(--coral);
+      border-radius: 8px;
+      background: #fbfcfe;
+      color: #263047;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .history-item b {
+      color: #172033;
+    }
+
+    .empty-history {
+      border-right-color: var(--line);
+      color: var(--muted);
+    }
+
+    @media (max-width: 1040px) {
+      header,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .header-actions {
+        justify-content: flex-start;
+      }
+
+      .formula {
+        white-space: normal;
+      }
+
+      .controls {
+        position: static;
+      }
+    }
+
+    @media (max-width: 700px) {
+      main {
+        width: min(100% - 22px, 1260px);
+        padding-top: 20px;
+      }
+
+      .plot-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .legend {
+        justify-content: flex-start;
+      }
+
+      .chart-wrap {
+        height: auto;
+        aspect-ratio: 1;
+        padding: 8px;
+      }
+
+      svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .btn-group {
+        grid-template-columns: 1fr;
+      }
+
+      .move-toolbar .btn-group {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>התאמת עכבות בתרשים סמית</h1>
+        <p class="subtitle">תרשים עכבה ואדמיטנס מנורמלים למעקב אחרי מהלכי התאמה בטור, במקביל ולאורך קו תמסורת.</p>
+        <a class="portal-link" href="portal_he.html">חזרה לפורטל</a>
+      </div>
+      <div class="header-actions" aria-label="קישורי הדגמה ומשוואות">
+        <a class="language-link" href="smith_chart.html" lang="en" dir="ltr">English</a>
+        <div class="formula">z = (1 + &Gamma;) / (1 - &Gamma;)<br>&Gamma; = (z - 1) / (z + 1)</div>
+      </div>
+    </header>
+
+    <section class="layout">
+      <section class="chart-panel" aria-label="מרחב העבודה של תרשים סמית">
+        <div class="plot-toolbar">
+          <div class="legend" aria-label="מקרא מסלולים">
+            <span><i class="swatch r"></i>R קבוע</span>
+            <span><i class="swatch x"></i>X קבוע</span>
+            <span><i class="swatch g"></i>|&Gamma;| קבוע</span>
+            <span><i class="swatch y"></i>אדמיטנס</span>
+          </div>
+        </div>
+
+        <div class="chart-wrap">
+          <div id="toolbar" class="move-toolbar" aria-label="אילוצי תנועה לנקודה מסומנת">
+            <div class="btn-group">
+              <button id="moveR" type="button" title="תנועה על מעגל עכבה קבועה">קיבוע R</button>
+              <button id="moveX" type="button" title="תנועה על מעגל היגב קבוע">קיבוע X</button>
+              <button id="moveG" type="button" title="תנועה על מעגל מקדם החזרה קבוע">קיבוע |&Gamma;|</button>
+              <button id="cancelMove" type="button" class="btn-danger">ביטול</button>
+            </div>
+          </div>
+          <div id="hud" aria-hidden="true"></div>
+          <svg id="chart" viewBox="-1.25 -1.25 2.5 2.5" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" aria-label="תרשים סמית אינטראקטיבי">
+            <rect x="-1.25" y="-1.25" width="2.5" height="2.5" fill="#fbfcfe"></rect>
+            <defs>
+              <clipPath id="unit-circle-clip">
+                <circle cx="0" cy="0" r="1"></circle>
+              </clipPath>
+            </defs>
+            <g id="grid-layer"></g>
+            <g id="admittance-layer"></g>
+            <g id="wtg-layer"></g>
+            <g id="overlay-layer">
+              <circle id="r50-highlight" cx="0.5" cy="0" r="0.5" class="highlight-circle"></circle>
+            </g>
+            <line x1="-1" y1="0" x2="1" y2="0" class="axis"></line>
+            <circle cx="0" cy="0" r="1" class="unit-circle"></circle>
+            <g id="path-layer"></g>
+            <path id="active-arc-visual" class="temp-arc" d=""></path>
+            <g id="ghost-layer"></g>
+            <g id="elements"></g>
+          </svg>
+        </div>
+      </section>
+
+      <aside class="controls" aria-label="בקרות תרשים סמית">
+        <h2>בקרות התאמה</h2>
+
+        <div class="control-panel">
+          <div class="panel-title">שכבות תצוגה</div>
+          <label class="control-label">
+            <input type="checkbox" id="toggle-50">
+            <span>מעגל תיאום</span>
+          </label>
+          <label class="slider-label" for="rotate-slider">
+            <span>סיבוב המעגל</span>
+            <output id="wave-val" for="rotate-slider">0.000&lambda;</output>
+          </label>
+          <input type="range" id="rotate-slider" min="-0.5" max="0.5" step="0.001" value="0">
+
+          <label class="control-label">
+            <input type="checkbox" id="toggle-y">
+            <span>אדמיטנס</span>
+          </label>
+        </div>
+
+        <div class="control-panel">
+          <div class="panel-title">פעולות</div>
+          <div class="btn-group">
+            <button id="undoBtn" class="btn-warning" type="button">ביטול צעד</button>
+            <button id="resetBtn" class="btn-danger" type="button">איפוס</button>
+          </div>
+          <button id="exportBtn" class="btn-success" type="button">ייצוא PNG ברזולוציה גבוהה</button>
+        </div>
+
+        <div class="control-panel">
+          <div class="panel-title">היסטוריית התאמה</div>
+          <div id="history-list" class="history-list">
+            <div class="empty-history">עדיין לא הוצבו נקודות.</div>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const svg = document.getElementById("chart");
+    const r50Circle = document.getElementById("r50-highlight");
+    const toggle50 = document.getElementById("toggle-50");
+    const toggleY = document.getElementById("toggle-y");
+    const rotateSlider = document.getElementById("rotate-slider");
+    const waveValDisplay = document.getElementById("wave-val");
+    const elements = document.getElementById("elements");
+    const ghostLayer = document.getElementById("ghost-layer");
+    const pathLayer = document.getElementById("path-layer");
+    const hud = document.getElementById("hud");
+    const toolbar = document.getElementById("toolbar");
+    const historyList = document.getElementById("history-list");
+    const arcVisual = document.getElementById("active-arc-visual");
+    const gridLayer = document.getElementById("grid-layer");
+    const admLayer = document.getElementById("admittance-layer");
+
+    const SVG_NS = "http://www.w3.org/2000/svg";
+    const labels = {
+      empty: "עדיין לא הוצבו נקודות.",
+      reset: "לאפס את תרשים סמית?",
+      placed: "הוצבה",
+      jump: "קפיצה",
+      bridge: "גישור",
+      shift: "הזזה",
+      wtg: "WTG"
+    };
+
+    let points = [];
+    let selectedPoint = null;
+    let moveMode = null;
+
+    function el(name) {
+      return document.createElementNS(SVG_NS, name);
+    }
+
+    function setAttrs(node, attrs) {
+      Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+      return node;
+    }
+
+    function updateEmptyHistory() {
+      if (historyList.children.length === 0) {
+        const div = document.createElement("div");
+        div.className = "empty-history";
+        div.textContent = labels.empty;
+        historyList.appendChild(div);
+      }
+    }
+
+    function clearEmptyHistory() {
+      const empty = historyList.querySelector(".empty-history");
+      if (empty) {
+        empty.remove();
+      }
+    }
+
+    toggle50.addEventListener("change", () => {
+      r50Circle.classList.toggle("highlight-active", toggle50.checked);
+    });
+
+    toggleY.addEventListener("change", () => {
+      admLayer.style.opacity = toggleY.checked ? "0.42" : "0";
+    });
+
+    rotateSlider.addEventListener("input", () => {
+      const wavelengths = Number(rotateSlider.value);
+      const degrees = wavelengths * 720;
+      waveValDisplay.textContent = wavelengths.toFixed(3) + "\u03bb";
+      r50Circle.setAttribute("transform", "rotate(" + degrees + ", 0, 0)");
+    });
+
+    document.getElementById("moveR").addEventListener("click", () => setMoveMode("R"));
+    document.getElementById("moveX").addEventListener("click", () => setMoveMode("X"));
+    document.getElementById("moveG").addEventListener("click", () => setMoveMode("G"));
+    document.getElementById("cancelMove").addEventListener("click", deselect);
+    document.getElementById("undoBtn").addEventListener("click", undoLast);
+    document.getElementById("resetBtn").addEventListener("click", clearChart);
+    document.getElementById("exportBtn").addEventListener("click", exportPNG);
+
+    function drawSmith() {
+      gridLayer.innerHTML = "";
+      admLayer.innerHTML = "";
+      document.getElementById("wtg-layer").innerHTML = "";
+      const wtgLayer = document.getElementById("wtg-layer");
+      const vals = [0.2, 0.5, 1, 2, 5];
+
+      vals.forEach(v => {
+        const r = 1 / (v + 1);
+        const cx = v / (v + 1);
+        const cz = setAttrs(el("circle"), { cx, cy: 0, r, class: "grid-line" });
+        gridLayer.appendChild(cz);
+
+        const labelR = setAttrs(el("text"), {
+          x: cx - r + 0.01,
+          y: 0.04,
+          class: "grid-label"
+        });
+        labelR.textContent = v;
+        gridLayer.appendChild(labelR);
+
+        const cy = setAttrs(el("circle"), {
+          cx: -cx,
+          cy: 0,
+          r,
+          class: "admittance-grid"
+        });
+        admLayer.appendChild(cy);
+
+        [v, -v].forEach(x => {
+          const rad = 1 / Math.abs(x);
+          const cyPos = 1 / x;
+          const az = setAttrs(el("circle"), {
+            cx: 1,
+            cy: -cyPos,
+            r: rad,
+            class: "grid-line",
+            "clip-path": "url(#unit-circle-clip)"
+          });
+          gridLayer.appendChild(az);
+
+          const ay = setAttrs(el("circle"), {
+            cx: -1,
+            cy: -cyPos,
+            r: rad,
+            class: "admittance-grid",
+            "clip-path": "url(#unit-circle-clip)"
+          });
+          admLayer.appendChild(ay);
+
+          const den = 1 + x ** 2;
+          const reG = (x ** 2 - 1) / den;
+          const imG = (2 * x) / den;
+          const labelX = setAttrs(el("text"), {
+            x: reG * 1.05,
+            y: -imG * 1.05 + 0.01,
+            class: "grid-label",
+            "text-anchor": "middle"
+          });
+          labelX.textContent = (x > 0 ? "+" : "-") + "j" + Math.abs(x);
+          gridLayer.appendChild(labelX);
+        });
+      });
+
+      for (let i = 0; i < 50; i += 1) {
+        const wtg = i / 100;
+        const angle = (0.25 - wtg) * 4 * Math.PI;
+        const tick = setAttrs(el("line"), {
+          x1: Math.cos(angle) * 1.12,
+          y1: -Math.sin(angle) * 1.12,
+          x2: Math.cos(angle) * 1.15,
+          y2: -Math.sin(angle) * 1.15,
+          class: "wtg-tick"
+        });
+        wtgLayer.appendChild(tick);
+
+        if (i % 5 === 0) {
+          const label = setAttrs(el("text"), {
+            x: Math.cos(angle) * 1.21,
+            y: -Math.sin(angle) * 1.21 + 0.01,
+            class: "wtg-label",
+            "text-anchor": "middle"
+          });
+          label.textContent = wtg.toFixed(2);
+          wtgLayer.appendChild(label);
+        }
+      }
+    }
+
+    function fromGamma(re, im) {
+      const den = Math.max(1e-9, (1 - re) ** 2 + im ** 2);
+      return {
+        r: Math.max(0, (1 - re ** 2 - im ** 2) / den),
+        x: (2 * im) / den
+      };
+    }
+
+    function toGamma(r, x) {
+      const den = (r + 1) ** 2 + x ** 2;
+      return den === 0 ? { re: 1, im: 0 } : {
+        re: ((r - 1) * (r + 1) + x ** 2) / den,
+        im: (2 * x) / den
+      };
+    }
+
+    function getSVGCoords(event) {
+      const pt = svg.createSVGPoint();
+      pt.x = event.clientX;
+      pt.y = event.clientY;
+      return pt.matrixTransform(svg.getScreenCTM().inverse());
+    }
+
+    function formatZ(z) {
+      const sign = z.x < 0 ? " - j" : " + j";
+      return z.r.toFixed(2) + sign + Math.abs(z.x).toFixed(2);
+    }
+
+    function pathForMode(mode, point) {
+      if (mode === "R") {
+        const r = 1 / (point.origZ.r + 1);
+        const cx = point.origZ.r / (point.origZ.r + 1);
+        return "M " + (cx - r) + " 0 A " + r + " " + r + " 0 1 0 " + (cx + r) + " 0 A " + r + " " + r + " 0 1 0 " + (cx - r) + " 0";
+      }
+
+      if (mode === "X") {
+        if (Math.abs(point.origZ.x) < 1e-6) {
+          return "M -1 0 L 1 0";
+        }
+        const rad = 1 / Math.abs(point.origZ.x);
+        const cy = 1 / point.origZ.x;
+        return "M 1 " + (-cy - rad) + " A " + rad + " " + rad + " 0 1 0 1 " + (-cy + rad) + " A " + rad + " " + rad + " 0 1 0 1 " + (-cy - rad);
+      }
+
+      const mag = Math.sqrt(point.origX ** 2 + point.origY ** 2);
+      return "M " + (-mag) + " 0 A " + mag + " " + mag + " 0 1 0 " + mag + " 0 A " + mag + " " + mag + " 0 1 0 " + (-mag) + " 0";
+    }
+
+    function wavelengthShift(fromPoint, toPoint) {
+      const a1 = Math.atan2(-fromPoint.y, fromPoint.x) * 180 / Math.PI;
+      const a2 = Math.atan2(-toPoint.y, toPoint.x) * 180 / Math.PI;
+      let diff = a1 - a2;
+      if (diff < 0) {
+        diff += 360;
+      }
+      return diff / 720;
+    }
+
+    function handlePointerMove(event) {
+      const coords = getSVGCoords(event);
+      const z = fromGamma(coords.x, -coords.y);
+      let wtgStr = "";
+
+      if (moveMode && selectedPoint) {
+        let newG;
+        if (moveMode === "R") {
+          newG = toGamma(selectedPoint.origZ.r, z.x);
+        } else if (moveMode === "X") {
+          newG = toGamma(z.r, selectedPoint.origZ.x);
+        } else {
+          const rMag = Math.sqrt(selectedPoint.origX ** 2 + selectedPoint.origY ** 2);
+          const angle = Math.atan2(coords.y, coords.x);
+          newG = { re: Math.cos(angle) * rMag, im: -Math.sin(angle) * rMag };
+        }
+
+        updatePointPos(selectedPoint, newG.re, -newG.im);
+        const shift = wavelengthShift(
+          { x: selectedPoint.origX, y: selectedPoint.origY },
+          { x: selectedPoint.domX, y: selectedPoint.domY }
+        );
+        wtgStr = "<br><span style=\"color:#b77900\">" + labels.wtg + ": " + shift.toFixed(4) + "\u03bb</span>";
+      }
+
+      if (Math.hypot(coords.x, coords.y) <= 1.3) {
+        hud.style.display = "block";
+        hud.style.left = event.clientX + 15 + "px";
+        hud.style.top = event.clientY + 15 + "px";
+        hud.innerHTML = "R: " + z.r.toFixed(2) + "<br>X: " + z.x.toFixed(2) + wtgStr;
+      } else {
+        hud.style.display = "none";
+      }
+    }
+
+    function handlePointerDown(event) {
+      const coords = getSVGCoords(event);
+
+      if (moveMode && selectedPoint) {
+        commitMove();
+        return;
+      }
+
+      const clickedPt = points.find(p => Math.hypot(p.domX - coords.x, p.domY - coords.y) < 0.05);
+      if (clickedPt) {
+        selectPoint(clickedPt);
+        return;
+      }
+
+      if (Math.hypot(coords.x, coords.y) < 1.05) {
+        if (points.length > 0) {
+          const last = points[points.length - 1];
+          const newZ = fromGamma(coords.x, -coords.y);
+          const dr = newZ.r - last.z.r;
+          const dx = newZ.x - last.z.x;
+          const shift = wavelengthShift({ x: last.domX, y: last.domY }, { x: coords.x, y: coords.y });
+          addHistory("<b>" + labels.jump + " P" + last.id + " \u2192 P" + (points.length + 1) + "</b><br>" + labels.bridge + " \u0394Z: " + dr.toFixed(3) + (dx >= 0 ? "+" : "") + "j" + dx.toFixed(3) + "<br>" + labels.shift + ": " + shift.toFixed(4) + "\u03bb");
+        }
+        createPoint(coords.x, coords.y);
+      }
+    }
+
+    function createPoint(x, y) {
+      const id = points.length + 1;
+      const group = el("g");
+      const circle = setAttrs(el("circle"), { r: 0.018, class: "point" });
+      const text = setAttrs(el("text"), { class: "p-label" });
+      text.textContent = "P" + id;
+      group.appendChild(circle);
+      group.appendChild(text);
+      elements.appendChild(group);
+
+      const pObj = { id, dom: group, circle, text, z: fromGamma(x, -y), domX: x, domY: y };
+      points.push(pObj);
+      updatePointPos(pObj, x, y);
+      addHistory("<b>P" + id + " " + labels.placed + "</b><br>Z: " + formatZ(pObj.z));
+    }
+
+    function updatePointPos(p, x, y) {
+      p.domX = x;
+      p.domY = y;
+      p.z = fromGamma(x, -y);
+      p.circle.setAttribute("cx", x);
+      p.circle.setAttribute("cy", y);
+      p.text.setAttribute("x", x + 0.03);
+      p.text.setAttribute("y", y - 0.03);
+    }
+
+    function selectPoint(p) {
+      if (selectedPoint) {
+        deselect();
+      }
+      selectedPoint = p;
+      p.origX = p.domX;
+      p.origY = p.domY;
+      p.origZ = { ...p.z };
+      p.circle.classList.add("selected");
+      toolbar.style.display = "block";
+      ghostLayer.innerHTML = "<circle cx=\"" + p.origX + "\" cy=\"" + p.origY + "\" r=\"0.018\" fill=\"#d65645\" opacity=\"0.28\"></circle>";
+    }
+
+    function setMoveMode(mode) {
+      if (!selectedPoint) {
+        return;
+      }
+      moveMode = mode;
+      document.querySelectorAll("#toolbar button").forEach(button => button.classList.remove("active"));
+      document.getElementById("move" + mode).classList.add("active");
+      arcVisual.classList.remove("color-R", "color-X", "color-G");
+      arcVisual.classList.add("color-" + mode);
+      arcVisual.setAttribute("d", pathForMode(mode, selectedPoint));
+    }
+
+    function commitMove() {
+      const path = el("path");
+      path.setAttribute("d", arcVisual.getAttribute("d"));
+      path.setAttribute("class", "permanent-path color-" + moveMode);
+      if (moveMode === "X") {
+        path.setAttribute("clip-path", "url(#unit-circle-clip)");
+      }
+      pathLayer.appendChild(path);
+
+      const shift = wavelengthShift(
+        { x: selectedPoint.origX, y: selectedPoint.origY },
+        { x: selectedPoint.domX, y: selectedPoint.domY }
+      );
+      addHistory("<b>P" + selectedPoint.id + " \u2192 P" + (points.length + 1) + "</b> [" + moveMode + "]<br>Z: " + formatZ(selectedPoint.z) + "<br>" + labels.shift + ": " + shift.toFixed(4) + "\u03bb");
+      createPoint(selectedPoint.domX, selectedPoint.domY);
+      updatePointPos(selectedPoint, selectedPoint.origX, selectedPoint.origY);
+      deselect();
+    }
+
+    function undoLast() {
+      if (points.length < 1) {
+        return;
+      }
+      const point = points.pop();
+      elements.removeChild(point.dom);
+      if (pathLayer.lastElementChild) {
+        pathLayer.removeChild(pathLayer.lastElementChild);
+      }
+      if (historyList.children.length > 0) {
+        historyList.removeChild(historyList.firstElementChild);
+      }
+      if (historyList.children.length > 0 && !historyList.firstElementChild.classList.contains("empty-history")) {
+        historyList.removeChild(historyList.firstElementChild);
+      }
+      updateEmptyHistory();
+    }
+
+    function deselect() {
+      if (selectedPoint) {
+        updatePointPos(selectedPoint, selectedPoint.origX, selectedPoint.origY);
+        selectedPoint.circle.classList.remove("selected");
+      }
+      selectedPoint = null;
+      moveMode = null;
+      toolbar.style.display = "none";
+      arcVisual.setAttribute("d", "");
+      ghostLayer.innerHTML = "";
+      document.querySelectorAll("#toolbar button").forEach(button => button.classList.remove("active"));
+    }
+
+    function addHistory(html) {
+      clearEmptyHistory();
+      const div = document.createElement("div");
+      div.className = "history-item";
+      div.innerHTML = html;
+      historyList.prepend(div);
+    }
+
+    function clearChart() {
+      if (!confirm(labels.reset)) {
+        return;
+      }
+      points = [];
+      elements.innerHTML = "";
+      pathLayer.innerHTML = "";
+      historyList.innerHTML = "";
+      updateEmptyHistory();
+      deselect();
+    }
+
+    function exportPNG() {
+      const clone = svg.cloneNode(true);
+      clone.setAttribute("width", "2000");
+      clone.setAttribute("height", "2000");
+      const style = document.createElementNS(SVG_NS, "style");
+      style.textContent = ".grid-line{stroke:#ccd7e6;stroke-width:0.003;fill:none}.axis{stroke:#7a8798;stroke-width:0.005}.unit-circle{stroke:#6c7788;stroke-width:0.008;fill:none}.grid-label{fill:#66768d;font-size:0.035px}.wtg-label{fill:#7c8797;font-size:0.025px;font-weight:700}.wtg-tick{stroke:#9aa8ba;stroke-width:0.003}.temp-arc{fill:none;stroke-width:0.004;stroke-dasharray:0.01;opacity:0.9}.permanent-path{fill:none;stroke-width:0.004;opacity:0.42}.color-R{stroke:#12866f}.color-X{stroke:#1d64d8}.color-G{stroke:#526071}.point{fill:#d65645}.point.selected{fill:#b77900;stroke:#172033;stroke-width:0.01}.p-label{fill:#172033;font-size:0.03px;font-weight:800}.highlight-circle{stroke:#d65645;stroke-width:0.008;fill:none;opacity:0}.highlight-circle.highlight-active{opacity:0.72}.admittance-grid{stroke:#b77900;stroke-width:0.002;fill:none}";
+      clone.insertBefore(style, clone.firstChild);
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 2000;
+      canvas.height = 2000;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#fbfcfe";
+      ctx.fillRect(0, 0, 2000, 2000);
+
+      const img = new Image();
+      const svgBlob = new Blob([new XMLSerializer().serializeToString(clone)], {
+        type: "image/svg+xml;charset=utf-8"
+      });
+      const url = URL.createObjectURL(svgBlob);
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, 2000, 2000);
+        const a = document.createElement("a");
+        a.href = canvas.toDataURL("image/png");
+        a.download = "smith_chart_matching.png";
+        a.click();
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+    }
+
+    svg.addEventListener("pointermove", handlePointerMove);
+    svg.addEventListener("pointerdown", handlePointerDown);
+    svg.addEventListener("pointerleave", () => {
+      hud.style.display = "none";
+    });
+
+    drawSmith();
+  </script>
+</body>
+</html>

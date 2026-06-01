@@ -239,6 +239,10 @@
       --accent: var(--teal);
     }
 
+    .match {
+      --accent: var(--amber);
+    }
+
     .box {
       --accent: var(--coral);
     }
@@ -315,10 +319,10 @@
     <header>
       <div>
         <h1>הדגמות שדות וגלים אלקטרומגנטיים</h1>
-        <p class="subtitle">פורטל מרוכז לכל ההדגמות האינטראקטיביות שאנחנו בונים יחד: קווי תמסורת, גלים עומדים, בעיות ערכי שפה אלקטרוסטטיות וחומרים דיאלקטריים.</p>
+        <p class="subtitle">פורטל מרוכז לכל ההדגמות האינטראקטיביות שאנחנו בונים יחד: קווי תמסורת, התאמת עכבות, גלים עומדים, בעיות ערכי שפה אלקטרוסטטיות וחומרים דיאלקטריים.</p>
       </div>
       <div class="meta" aria-label="בקרות הפורטל">
-        <span class="pill">4 הדגמות</span>
+        <span class="pill">5 הדגמות</span>
         <a class="language-link" href="portal.html" lang="en" dir="ltr">English</a>
       </div>
     </header>
@@ -367,6 +371,31 @@
               <path d="M62 125 C94 168 126 168 158 125 S222 82 254 125 S302 166 324 132" fill="none" stroke="#1d64d8" stroke-width="5" stroke-linecap="round" opacity="0.85"></path>
               <circle cx="42" cy="76" r="11" fill="#ffffff" stroke="#b77900" stroke-width="5"></circle>
               <circle cx="42" cy="174" r="11" fill="#ffffff" stroke="#b77900" stroke-width="5"></circle>
+            </svg>
+          </span>
+        </a>
+
+        <a class="demo-card match" href="smith_chart_he.html">
+          <span class="card-body">
+            <span class="kicker">התאמת עכבות</span>
+            <h3>כלי התאמה בתרשים סמית</h3>
+            <p>הציבו נקודות עכבה מנורמלות ועקבו אחרי מהלכי R, X ו-|&Gamma;| בתכנון ההתאמה.</p>
+            <span class="equation">z = (1 + &Gamma;) / (1 - &Gamma;)</span>
+            <span class="open-label">פתיחת הדגמה &larr;</span>
+          </span>
+          <span class="thumb" aria-hidden="true">
+            <svg viewBox="0 0 360 250" focusable="false">
+              <rect width="360" height="250" fill="#f8fbff"></rect>
+              <circle cx="180" cy="125" r="82" fill="#ffffff" stroke="#6f7788" stroke-width="5"></circle>
+              <path d="M98 125 H262" stroke="#7d8999" stroke-width="3" stroke-linecap="round"></path>
+              <circle cx="221" cy="125" r="41" fill="none" stroke="#ccd7e6" stroke-width="3"></circle>
+              <circle cx="207" cy="125" r="55" fill="none" stroke="#ccd7e6" stroke-width="3"></circle>
+              <path d="M262 69 A74 74 0 0 0 262 181" fill="none" stroke="#1d64d8" stroke-width="4" stroke-linecap="round"></path>
+              <path d="M262 181 A74 74 0 0 1 262 69" fill="none" stroke="#d65645" stroke-width="4" stroke-linecap="round" opacity="0.75"></path>
+              <circle cx="180" cy="125" r="50" fill="none" stroke="#b77900" stroke-width="4" stroke-dasharray="8 8"></circle>
+              <path d="M128 151 C152 96 201 95 235 126" fill="none" stroke="#12866f" stroke-width="7" stroke-linecap="round"></path>
+              <circle cx="128" cy="151" r="8" fill="#ffffff" stroke="#d65645" stroke-width="5"></circle>
+              <circle cx="235" cy="126" r="8" fill="#ffffff" stroke="#12866f" stroke-width="5"></circle>
             </svg>
           </span>
         </a>
@@ -425,6 +454,9 @@
 
     <footer>
       הדגמות שדות וגלים אלקטרומגנטיים | פורטל עברי
+      <div dir="ltr" style="margin-top: 8px;">
+        created by <a href="https://wavetheory.group" style="color: var(--blue); font-weight: 700;">Yarden Mazor</a>, School of ECE, Tel-Aviv University
+      </div>
     </footer>
   </main>
 </body>
