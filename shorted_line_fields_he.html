@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>שדות בקו תמסורת מקוצר</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #617089;
+      --line: #d8e0ea;
+      --blue: #1d64d8;
+      --red: #d55345;
+      --green: #12866f;
+      --amber: #a96f00;
+      --shadow: 0 18px 45px rgba(29, 44, 73, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      direction: rtl;
+      text-align: right;
+      background:
+        linear-gradient(180deg, rgba(246, 248, 251, 0.98), rgba(235, 241, 248, 0.96)),
+        radial-gradient(circle at 82% 10%, rgba(18, 134, 111, 0.12), transparent 34%),
+        radial-gradient(circle at 8% 18%, rgba(213, 83, 69, 0.10), transparent 30%);
+      color: var(--ink);
+    }
+
+    main {
+      width: min(1160px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 26px 0 34px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: end;
+      padding: 4px 0 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 3.5vw, 3.05rem);
+      line-height: 1.03;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.55;
+    }
+
+    .portal-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      margin-top: 14px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 8px 24px rgba(29, 44, 73, 0.08);
+      color: var(--blue);
+      font-size: 0.93rem;
+      font-weight: 700;
+      line-height: 1.2;
+      text-decoration: none;
+    }
+
+    .portal-link:hover {
+      border-color: rgba(29, 100, 216, 0.45);
+      background: #ffffff;
+    }
+
+    .portal-link:focus-visible {
+      outline: 3px solid rgba(29, 100, 216, 0.34);
+      outline-offset: 3px;
+    }
+
+    .formula {
+      justify-self: end;
+      max-width: 520px;
+      direction: ltr;
+      text-align: left;
+      unicode-bidi: isolate;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 8px 24px rgba(29, 44, 73, 0.08);
+      color: #24324a;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.87rem;
+      line-height: 1.48;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .plot-panel,
+    .controls {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow);
+    }
+
+    .plot-panel {
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .plot-toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 1rem;
+    }
+
+    .plot-title p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px 14px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .swatch {
+      width: 22px;
+      height: 3px;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+    .swatch.h {
+      background: var(--red);
+    }
+
+    .swatch.ref {
+      background: repeating-linear-gradient(90deg, var(--amber) 0 7px, rgba(169, 111, 0, 0) 7px 11px);
+    }
+
+    .canvas-wrap {
+      height: clamp(360px, 58vh, 560px);
+      min-height: 340px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .readouts {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    .metric {
+      min-width: 0;
+      padding: 14px 16px;
+      border-right: 1px solid var(--line);
+    }
+
+    .metric:last-child {
+      border-right: 0;
+    }
+
+    .metric b {
+      display: block;
+      font-size: clamp(1.03rem, 2vw, 1.38rem);
+      line-height: 1.12;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.25;
+    }
+
+    .controls {
+      padding: 17px 18px 19px;
+    }
+
+    .control-note {
+      margin: 6px 0 16px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .slider-block {
+      display: grid;
+      gap: 9px;
+      margin: 0 0 17px;
+    }
+
+    label {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    output {
+      direction: ltr;
+      color: var(--blue);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.86rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      direction: ltr;
+      accent-color: var(--blue);
+    }
+
+    .diagram {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f9fbfd;
+      overflow: hidden;
+    }
+
+    .diagram-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 11px 12px 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .diagram-canvas {
+      height: 170px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .mini {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 11px 12px;
+      background: #ffffff;
+    }
+
+    .mini b {
+      display: block;
+      font-size: 1.02rem;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .mini span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.25;
+    }
+
+    @media (max-width: 920px) {
+      header,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .formula {
+        justify-self: stretch;
+      }
+
+      .controls {
+        order: -1;
+      }
+    }
+
+    @media (max-width: 680px) {
+      main {
+        width: min(100vw - 20px, 1160px);
+        padding-top: 16px;
+      }
+
+      .plot-toolbar {
+        display: grid;
+      }
+
+      .legend {
+        justify-content: flex-start;
+      }
+
+      .readouts,
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .metric {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .metric:last-child {
+        border-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>שדות בקו תמסורת מקוצר</h1>
+        <p class="subtitle">
+          מקור מתח V0 מזין מקטע קו תמסורת חסר הפסדים שקצהו הרחוק מקוצר. הזיזו את מרחק המקור L וצפו באמפליטודות הגל העומד של השדה החשמלי והשדה המגנטי בין המקור לבין הקצר.
+        </p>
+        <a class="portal-link" href="portal_he.html">חזרה לפורטל</a>
+      </div>
+      <div class="formula" aria-label="נוסחאות לקו מקוצר">
+        E(x) / E0 = sin(&beta;x) / sin(&beta;L)<br>
+        H(x) / H0 = cos(&beta;x) / sin(&beta;L)<br>
+        Z<sub>in</sub> / Z0 = j tan(&beta;L), &beta; = 2&pi;/&lambda;
+      </div>
+    </header>
+
+    <section class="layout">
+      <article class="plot-panel" aria-label="גרף השדות">
+        <div class="plot-toolbar">
+          <div class="plot-title">
+            <h2>השדות מהקצר עד המקור</h2>
+            <p>הקצר קבוע ב-x = 0; המקור נמצא ב-x = L.</p>
+          </div>
+          <div class="legend" aria-label="מקרא הגרף">
+            <span><i class="swatch"></i>שדה E / E0</span>
+            <span><i class="swatch h"></i>שדה H / H0</span>
+            <span><i class="swatch ref"></i>מתח המקור V0</span>
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="fieldCanvas" aria-label="השדה החשמלי והשדה המגנטי לאורך קו מקוצר"></canvas>
+        </div>
+        <div class="readouts">
+          <div class="metric">
+            <b id="lengthValue">0.250 λ</b>
+            <span>מרחק המקור L</span>
+          </div>
+          <div class="metric">
+            <b id="zinValue">j1.00 Z0</b>
+            <span>עכבת כניסה במקור</span>
+          </div>
+          <div class="metric">
+            <b id="sourceHValue">0.00</b>
+            <span>H(L) / H0</span>
+          </div>
+          <div class="metric">
+            <b id="displayScaleValue">±4</b>
+            <span>סקאלת הגרף</span>
+          </div>
+        </div>
+      </article>
+
+      <aside class="controls" aria-label="בקרות הקו">
+        <h2>מיקום המקור</h2>
+        <p class="control-note">
+          L נמדד ביחידות של אורך גל. במודל של מקור אידאלי השדות גדלים מאוד ליד רזוננסים של חצי אורך גל.
+        </p>
+
+        <div class="slider-block">
+          <label for="lengthSlider">
+            <span>מרחק L</span>
+            <output id="lengthOut" for="lengthSlider">0.250 λ</output>
+          </label>
+          <input id="lengthSlider" type="range" min="0.05" max="2" step="0.005" value="0.25">
+        </div>
+
+        <div class="slider-block">
+          <label for="scaleSlider">
+            <span>סקאלת הגרף</span>
+            <output id="scaleOut" for="scaleSlider">±4</output>
+          </label>
+          <input id="scaleSlider" type="range" min="1" max="20" step="0.5" value="4">
+        </div>
+
+        <div class="diagram">
+          <div class="diagram-head">
+            <span>מקטע הקו</span>
+            <span>קצר ב-x = 0</span>
+          </div>
+          <div class="diagram-canvas">
+            <canvas id="diagramCanvas" aria-label="דיאגרמה של מקטע קו התמסורת"></canvas>
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div class="mini">
+            <b id="phaseLengthValue">90.0°</b>
+            <span>אורך חשמלי βL</span>
+          </div>
+          <div class="mini">
+            <b id="nearestNodeValue">0.000 λ</b>
+            <span>צומת E הקרוב ביותר</span>
+          </div>
+        </div>
+
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const TWO_PI = Math.PI * 2;
+    const POINTS = 900;
+    const MIN_DENOM = 0.018;
+
+    const fieldCanvas = document.getElementById("fieldCanvas");
+    const diagramCanvas = document.getElementById("diagramCanvas");
+    const lengthSlider = document.getElementById("lengthSlider");
+    const scaleSlider = document.getElementById("scaleSlider");
+    const lengthOut = document.getElementById("lengthOut");
+    const scaleOut = document.getElementById("scaleOut");
+
+    const readout = {
+      length: document.getElementById("lengthValue"),
+      zin: document.getElementById("zinValue"),
+      sourceH: document.getElementById("sourceHValue"),
+      scale: document.getElementById("displayScaleValue"),
+      phaseLength: document.getElementById("phaseLengthValue"),
+      nearestNode: document.getElementById("nearestNodeValue")
+    };
+
+    function resizeCanvas(canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const scale = window.devicePixelRatio || 1;
+      const width = Math.max(1, Math.round(rect.width * scale));
+      const height = Math.max(1, Math.round(rect.height * scale));
+
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function signedSafeDenominator(length) {
+      const raw = Math.sin(TWO_PI * length);
+      if (Math.abs(raw) >= MIN_DENOM) {
+        return raw;
+      }
+      return (raw < 0 ? -1 : 1) * MIN_DENOM;
+    }
+
+    function eField(x, denominator) {
+      return Math.sin(TWO_PI * x) / denominator;
+    }
+
+    function hField(x, denominator) {
+      return Math.cos(TWO_PI * x) / denominator;
+    }
+
+    function nice(value, digits = 2) {
+      if (!Number.isFinite(value)) {
+        return "diverges";
+      }
+      return value.toFixed(digits);
+    }
+
+    function formatLength(value) {
+      return value.toFixed(3) + " λ";
+    }
+
+    function formatZin(length) {
+      const tangent = Math.tan(TWO_PI * length);
+      if (Math.abs(Math.cos(TWO_PI * length)) < 0.006) {
+        return "פתוח";
+      }
+      if (Math.abs(tangent) < 0.005) {
+        return "0 Z0";
+      }
+      if (Math.abs(tangent) > 999) {
+        return "גדול מאוד";
+      }
+      const sign = tangent < 0 ? "-j" : "j";
+      return sign + Math.abs(tangent).toFixed(2) + " Z0";
+    }
+
+    function nearestENode(length) {
+      const nodeIndex = Math.round(length / 0.5);
+      const node = Math.max(0, Math.min(length, nodeIndex * 0.5));
+      return formatLength(node);
+    }
+
+    function drawGrid(ctx, plot, length, limit) {
+      ctx.save();
+      ctx.strokeStyle = "#dbe4ee";
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#617089";
+      ctx.font = "12px Inter, system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+
+      const yFor = value => plot.top + ((limit - value) / (2 * limit)) * plot.height;
+      const xFor = x => plot.left + (x / length) * plot.width;
+      const xStep = length <= 0.5 ? 0.05 : length <= 1.1 ? 0.1 : 0.25;
+
+      for (let x = 0; x <= length + 0.0001; x += xStep) {
+        const px = xFor(x);
+        ctx.beginPath();
+        ctx.moveTo(px, plot.top);
+        ctx.lineTo(px, plot.bottom);
+        ctx.stroke();
+        ctx.fillText(x.toFixed(xStep < 0.1 ? 2 : 1), px, plot.bottom + 10);
+      }
+
+      const yStep = limit <= 3 ? 0.5 : limit <= 8 ? 2 : 5;
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      drawYLine(limit);
+      drawYLine(-limit);
+      for (let y = yStep; y < limit - 0.001; y += yStep) {
+        drawYLine(y);
+        drawYLine(-y);
+      }
+      drawYLine(0, true);
+
+      function drawYLine(y, isZero = false) {
+        const py = yFor(y);
+        ctx.strokeStyle = isZero ? "#8fa2ba" : "#dbe4ee";
+        ctx.lineWidth = isZero ? 1.7 : 1;
+        ctx.beginPath();
+        ctx.moveTo(plot.left, py);
+        ctx.lineTo(plot.right, py);
+        ctx.stroke();
+        ctx.fillText(formatAxisValue(y), plot.left - 9, py);
+        if (isZero) {
+          ctx.save();
+          ctx.fillStyle = "#475569";
+          ctx.direction = "ltr";
+          ctx.textAlign = "left";
+          ctx.textBaseline = "bottom";
+          ctx.fillText("V = 0", plot.left + 8, py - 5);
+          ctx.restore();
+        }
+      }
+
+      ctx.fillStyle = "#172033";
+      ctx.font = "700 12px Inter, system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.direction = "rtl";
+      ctx.fillText("מיקום x / אורך גל", plot.left + plot.width / 2, plot.bottom + 42);
+
+      ctx.save();
+      ctx.translate(16, plot.top + plot.height / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = "center";
+      ctx.direction = "rtl";
+      ctx.fillText("אמפליטודת שדה מנורמלת", 0, 0);
+      ctx.restore();
+      ctx.restore();
+    }
+
+    function formatAxisValue(value) {
+      const absValue = Math.abs(value);
+      if (absValue < 0.001) {
+        return "0";
+      }
+      const digits = absValue % 1 === 0 ? 0 : 1;
+      return (value > 0 ? "+" : "-") + absValue.toFixed(digits);
+    }
+
+    function drawCurve(ctx, plot, length, limit, valueAt, color, width) {
+      const yFor = value => plot.top + ((limit - value) / (2 * limit)) * plot.height;
+      const xFor = x => plot.left + (x / length) * plot.width;
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.beginPath();
+
+      for (let i = 0; i <= POINTS; i += 1) {
+        const x = (i / POINTS) * length;
+        const y = Math.max(-limit, Math.min(limit, valueAt(x)));
+        const px = xFor(x);
+        const py = yFor(y);
+        if (i === 0) {
+          ctx.moveTo(px, py);
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawSourceReference(ctx, plot, limit) {
+      const yFor = value => plot.top + ((limit - value) / (2 * limit)) * plot.height;
+      const y = yFor(1);
+
+      ctx.save();
+      ctx.strokeStyle = "#a96f00";
+      ctx.fillStyle = "#75500d";
+      ctx.lineWidth = 1.6;
+      ctx.setLineDash([8, 7]);
+      ctx.beginPath();
+      ctx.moveTo(plot.left, y);
+      ctx.lineTo(plot.right, y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font = "700 12px Inter, system-ui, sans-serif";
+      ctx.direction = "rtl";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "bottom";
+      ctx.fillText("ייחוס V0", plot.right - 8, y - 5);
+      ctx.restore();
+    }
+
+    function drawPlotNotice(ctx, plot, text, row = 0) {
+      ctx.save();
+      ctx.font = "700 12px Inter, system-ui, sans-serif";
+      const paddingX = 10;
+      const measuredWidth = ctx.measureText ? ctx.measureText(text).width : text.length * 7;
+      const width = Math.min(plot.width - 18, measuredWidth + paddingX * 2);
+      const height = 28;
+      const x = plot.left + (plot.width - width) / 2;
+      const y = plot.top + 10 + row * 34;
+
+      ctx.fillStyle = "rgba(255, 248, 229, 0.96)";
+      ctx.strokeStyle = "rgba(169, 111, 0, 0.38)";
+      ctx.lineWidth = 1;
+      roundRect(ctx, x, y, width, height, 6);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#75500d";
+      ctx.direction = "rtl";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, x + width / 2, y + height / 2 + 1);
+      ctx.restore();
+    }
+
+    function roundRect(ctx, x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + width - r, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+      ctx.lineTo(x + width, y + height - r);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+      ctx.lineTo(x + r, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+    }
+
+    function drawMarkers(ctx, plot, length, limit) {
+      const xFor = x => plot.left + (x / length) * plot.width;
+      const yFor = value => plot.top + ((limit - value) / (2 * limit)) * plot.height;
+
+      ctx.save();
+      ctx.font = "700 12px Inter, system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+
+      mark(0, "קצר", "#172033", -1);
+      mark(length, "מקור V0", "#1d64d8", 1);
+
+      function mark(x, label, color, value) {
+        const px = xFor(x);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.4;
+        ctx.setLineDash([4, 7]);
+        ctx.beginPath();
+        ctx.moveTo(px, plot.top);
+        ctx.lineTo(px, plot.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(px, yFor(Math.max(-limit, Math.min(limit, value))), 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillText(label, px, plot.top + 16);
+      }
+
+      ctx.restore();
+    }
+
+    function drawFields(length, limit) {
+      const { ctx, width, height } = resizeCanvas(fieldCanvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const denominator = signedSafeDenominator(length);
+      const resonant = Math.abs(Math.sin(TWO_PI * length)) < MIN_DENOM * 1.6;
+      let maxAbs = 1.2;
+
+      for (let i = 0; i <= POINTS; i += 1) {
+        const x = (i / POINTS) * length;
+        maxAbs = Math.max(maxAbs, Math.abs(eField(x, denominator)), Math.abs(hField(x, denominator)));
+      }
+
+      const plot = {
+        left: Math.min(74, Math.max(56, width * 0.1)),
+        right: width - 26,
+        top: 24,
+        bottom: height - 62
+      };
+      plot.width = plot.right - plot.left;
+      plot.height = plot.bottom - plot.top;
+
+      drawGrid(ctx, plot, length, limit);
+      drawSourceReference(ctx, plot, limit);
+      drawCurve(ctx, plot, length, limit, x => eField(x, denominator), "#1d64d8", 3);
+      drawCurve(ctx, plot, length, limit, x => hField(x, denominator), "#d55345", 2.5);
+      drawMarkers(ctx, plot, length, limit);
+
+      let noticeRow = 0;
+      if (resonant) {
+        drawPlotNotice(ctx, plot, "קרוב לרזוננס", noticeRow);
+        noticeRow += 1;
+      }
+      if (maxAbs > limit) {
+        drawPlotNotice(ctx, plot, "ערכים נחתכים", noticeRow);
+      }
+      const scaleText = "±" + limit.toFixed(limit % 1 === 0 ? 0 : 1);
+      scaleOut.textContent = scaleText;
+      readout.scale.textContent = scaleText;
+    }
+
+    function drawDiagram(length) {
+      const { ctx, width, height } = resizeCanvas(diagramCanvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const left = 34;
+      const right = width - 28;
+      const y = height * 0.52;
+
+      ctx.save();
+      ctx.strokeStyle = "#9fb0c5";
+      ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(left, y - 16);
+      ctx.lineTo(right, y - 16);
+      ctx.moveTo(left, y + 16);
+      ctx.lineTo(right, y + 16);
+      ctx.stroke();
+
+      ctx.strokeStyle = "#172033";
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 5; i += 1) {
+        const sx = left - 14 + i * 6;
+        ctx.beginPath();
+        ctx.moveTo(sx, y - 22);
+        ctx.lineTo(sx + 16, y + 22);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = "#1d64d8";
+      ctx.fillStyle = "#1d64d8";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(right, y - 28);
+      ctx.lineTo(right, y + 28);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(right, y, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = "#617089";
+      ctx.lineWidth = 1.4;
+      ctx.setLineDash([5, 6]);
+      ctx.beginPath();
+      ctx.moveTo(left, y + 46);
+      ctx.lineTo(right, y + 46);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = "#172033";
+      ctx.font = "700 12px Inter, system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.direction = "rtl";
+      ctx.fillText("קצר", left, y - 38);
+      ctx.fillText("מקור V0", right, y - 38);
+      ctx.direction = "ltr";
+      ctx.fillText("L = " + formatLength(length), (left + right) / 2, y + 68);
+      ctx.restore();
+    }
+
+    function update() {
+      const length = Number(lengthSlider.value);
+      const scale = Number(scaleSlider.value);
+      const denominator = signedSafeDenominator(length);
+      const sourceH = hField(length, denominator);
+      const electricalDegrees = 360 * length;
+
+      lengthOut.textContent = formatLength(length);
+      readout.length.textContent = formatLength(length);
+      readout.zin.textContent = formatZin(length);
+      readout.sourceH.textContent = nice(sourceH, 2);
+      readout.phaseLength.textContent = electricalDegrees.toFixed(1) + "°";
+      readout.nearestNode.textContent = nearestENode(length);
+
+      drawFields(length, scale);
+      drawDiagram(length);
+    }
+
+    lengthSlider.addEventListener("input", update);
+    scaleSlider.addEventListener("input", update);
+    window.addEventListener("resize", update);
+    update();
+  </script>
+</body>
+</html>

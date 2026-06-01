@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EM Fields and Waves Demonstrations</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f9fc;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #607086;
+      --line: #d9e2ec;
+      --blue: #1d64d8;
+      --teal: #0f8f83;
+      --coral: #d65645;
+      --amber: #b77900;
+      --violet: #6f55c7;
+      --shadow: 0 18px 45px rgba(29, 44, 73, 0.11);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(236, 242, 249, 0.98)),
+        linear-gradient(135deg, rgba(29, 100, 216, 0.08), rgba(15, 143, 131, 0.08) 42%, rgba(214, 86, 69, 0.07));
+      color: var(--ink);
+    }
+
+    a {
+      color: inherit;
+    }
+
+    main {
+      width: 100%;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 28px 16px 34px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 22px;
+      align-items: start;
+      padding: 6px 0 26px;
+    }
+
+    header > div {
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 840px;
+      font-size: 2.8rem;
+      line-height: 1.04;
+      letter-spacing: 0;
+      overflow-wrap: break-word;
+    }
+
+    .subtitle {
+      margin: 12px 0 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 1.03rem;
+      line-height: 1.58;
+      overflow-wrap: break-word;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .pill,
+    .language-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.76);
+      font-size: 0.92rem;
+      line-height: 1.2;
+      text-decoration: none;
+      box-shadow: 0 8px 24px rgba(29, 44, 73, 0.07);
+    }
+
+    .language-link {
+      color: var(--blue);
+      font-weight: 700;
+    }
+
+    .language-link:focus-visible,
+    .demo-card:focus-visible {
+      outline: 3px solid rgba(29, 100, 216, 0.34);
+      outline-offset: 3px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 24px 0 12px;
+    }
+
+    .section-heading::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--section-accent, var(--blue));
+      box-shadow: 0 0 0 5px rgba(29, 100, 216, 0.11);
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .demo-card {
+      display: grid;
+      grid-template-columns: minmax(180px, 0.72fr) minmax(0, 1fr);
+      min-width: 0;
+      min-height: 250px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow);
+      text-decoration: none;
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .demo-card:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--accent) 46%, var(--line));
+      box-shadow: 0 22px 55px rgba(29, 44, 73, 0.15);
+    }
+
+    .thumb {
+      display: grid;
+      min-width: 0;
+      min-height: 250px;
+      place-items: stretch;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(243, 247, 251, 0.88));
+      border-inline-end: 1px solid var(--line);
+    }
+
+    .thumb svg {
+      width: 100%;
+      height: 100%;
+      min-height: 250px;
+      display: block;
+    }
+
+    .card-body {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      gap: 12px;
+      padding: 22px 22px 20px;
+    }
+
+    .kicker {
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .demo-card h3 {
+      margin: 0;
+      font-size: 1.38rem;
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+
+    .demo-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+      line-height: 1.52;
+    }
+
+    .open-label {
+      margin-top: auto;
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 0.95rem;
+    }
+
+    .equation {
+      display: inline-block;
+      max-width: 100%;
+      margin-top: 2px;
+      padding: 7px 9px;
+      border: 1px solid rgba(96, 112, 134, 0.22);
+      border-radius: 8px;
+      color: #263047;
+      background: rgba(248, 250, 252, 0.86);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.82rem;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .wave {
+      --accent: var(--blue);
+    }
+
+    .line {
+      --accent: var(--teal);
+    }
+
+    .box {
+      --accent: var(--coral);
+    }
+
+    .sphere {
+      --accent: var(--violet);
+    }
+
+    .fields {
+      --section-accent: var(--coral);
+    }
+
+    footer {
+      margin-top: 28px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 940px) {
+      header {
+        grid-template-columns: 1fr;
+      }
+
+      .meta {
+        justify-content: flex-start;
+      }
+
+      .demo-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      main {
+        padding: 20px 11px 34px;
+      }
+
+      h1 {
+        font-size: 2.05rem;
+      }
+
+      .subtitle {
+        font-size: 0.98rem;
+      }
+
+      .demo-card {
+        grid-template-columns: 1fr;
+      }
+
+      .thumb {
+        min-height: 170px;
+        border-inline-end: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .thumb svg {
+        min-height: 170px;
+      }
+
+      .card-body {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>EM Fields and Waves Demonstrations</h1>
+        <p class="subtitle">A compact portal for the interactive demonstrations we are building together: transmission lines, standing waves, electrostatic boundary-value problems, and dielectric media.</p>
+      </div>
+      <div class="meta" aria-label="Portal controls">
+        <span class="pill">4 demonstrations</span>
+        <a class="language-link" href="portal_he.html" lang="he" dir="rtl">עברית</a>
+      </div>
+    </header>
+
+    <section aria-labelledby="waves-title">
+      <div class="section-heading">
+        <h2 id="waves-title">Transmission Lines and Waves</h2>
+      </div>
+      <div class="demo-grid">
+        <a class="demo-card wave" href="vswr_demo.html">
+          <span class="thumb" aria-hidden="true">
+            <svg viewBox="0 0 360 250" focusable="false">
+              <rect width="360" height="250" fill="#f8fbff"></rect>
+              <path d="M28 125 H332" stroke="#d7e1ec" stroke-width="2"></path>
+              <path d="M28 62 C70 22 102 22 144 62 S218 102 258 62 S306 22 332 62" fill="none" stroke="#1d64d8" stroke-width="8" stroke-linecap="round"></path>
+              <path d="M28 188 C70 228 102 228 144 188 S218 148 258 188 S306 228 332 188" fill="none" stroke="#d65645" stroke-width="8" stroke-linecap="round" opacity="0.82"></path>
+              <path d="M28 78 C84 119 128 132 180 125 S278 132 332 172" fill="none" stroke="#0f8f83" stroke-width="4" stroke-linecap="round" stroke-dasharray="9 9"></path>
+              <circle cx="144" cy="62" r="8" fill="#ffffff" stroke="#1d64d8" stroke-width="4"></circle>
+              <circle cx="258" cy="188" r="8" fill="#ffffff" stroke="#d65645" stroke-width="4"></circle>
+            </svg>
+          </span>
+          <span class="card-body">
+            <span class="kicker">Standing waves</span>
+            <h3>Voltage Standing Wave Ratio</h3>
+            <p>Adjust the complex reflection coefficient and watch sixteen faded snapshots of the instantaneous voltage along a transmission line.</p>
+            <span class="equation">VSWR = (1 + |&Gamma;|) / (1 - |&Gamma;|)</span>
+            <span class="open-label">Open demo &rarr;</span>
+          </span>
+        </a>
+
+        <a class="demo-card line" href="shorted_line_fields.html">
+          <span class="thumb" aria-hidden="true">
+            <svg viewBox="0 0 360 250" focusable="false">
+              <rect width="360" height="250" fill="#f8fbff"></rect>
+              <path d="M42 76 H304" stroke="#263047" stroke-width="7" stroke-linecap="round"></path>
+              <path d="M42 174 H304" stroke="#263047" stroke-width="7" stroke-linecap="round"></path>
+              <path d="M304 55 V195" stroke="#d65645" stroke-width="9" stroke-linecap="round"></path>
+              <path d="M62 125 C94 71 126 71 158 125 S222 179 254 125 S302 74 324 118" fill="none" stroke="#0f8f83" stroke-width="7" stroke-linecap="round"></path>
+              <path d="M62 125 C94 168 126 168 158 125 S222 82 254 125 S302 166 324 132" fill="none" stroke="#1d64d8" stroke-width="5" stroke-linecap="round" opacity="0.85"></path>
+              <circle cx="42" cy="76" r="11" fill="#ffffff" stroke="#b77900" stroke-width="5"></circle>
+              <circle cx="42" cy="174" r="11" fill="#ffffff" stroke="#b77900" stroke-width="5"></circle>
+            </svg>
+          </span>
+          <span class="card-body">
+            <span class="kicker">Shorted line</span>
+            <h3>Shorted Transmission Line Fields</h3>
+            <p>Move the source distance and watch the electric-field and magnetic-field standing-wave amplitudes between the source and the short.</p>
+            <span class="equation">E(x)/E<sub>0</sub> = sin(&beta;x) / sin(&beta;L)</span>
+            <span class="open-label">Open demo &rarr;</span>
+          </span>
+        </a>
+      </div>
+    </section>
+
+    <section class="fields" aria-labelledby="fields-title">
+      <div class="section-heading">
+        <h2 id="fields-title">Electrostatic Fields</h2>
+      </div>
+      <div class="demo-grid">
+        <a class="demo-card box" href="electrostatic_box_fields.html">
+          <span class="thumb" aria-hidden="true">
+            <svg viewBox="0 0 360 250" focusable="false">
+              <rect width="360" height="250" fill="#f8fbff"></rect>
+              <rect x="58" y="45" width="244" height="160" rx="6" fill="#ffffff" stroke="#263047" stroke-width="7"></rect>
+              <path d="M58 45 V205" stroke="#d65645" stroke-width="9" stroke-linecap="round"></path>
+              <path d="M90 65 C132 96 132 154 90 185" fill="none" stroke="#d65645" stroke-width="4" stroke-linecap="round" opacity="0.82"></path>
+              <path d="M130 63 C182 94 182 156 130 187" fill="none" stroke="#b77900" stroke-width="4" stroke-linecap="round" opacity="0.82"></path>
+              <path d="M176 62 C236 92 236 158 176 188" fill="none" stroke="#0f8f83" stroke-width="4" stroke-linecap="round" opacity="0.82"></path>
+              <path d="M224 64 C274 96 274 154 224 186" fill="none" stroke="#1d64d8" stroke-width="4" stroke-linecap="round" opacity="0.82"></path>
+            </svg>
+          </span>
+          <span class="card-body">
+            <span class="kicker">Boundary values</span>
+            <h3>2D Electrostatic Box Fields</h3>
+            <p>Explore a charge-free rectangular region with three grounded walls and a selectable potential profile on the driven wall.</p>
+            <span class="equation">&nabla;<sup>2</sup>V = 0, E = -grad V</span>
+            <span class="open-label">Open demo &rarr;</span>
+          </span>
+        </a>
+
+        <a class="demo-card sphere" href="dielectric_sphere_fields.html">
+          <span class="thumb" aria-hidden="true">
+            <svg viewBox="0 0 360 250" focusable="false">
+              <rect width="360" height="250" fill="#f8fbff"></rect>
+              <circle cx="180" cy="125" r="66" fill="#ffffff" stroke="#6f55c7" stroke-width="7"></circle>
+              <path d="M35 55 C105 75 129 75 180 55 S258 35 325 55" fill="none" stroke="#1d64d8" stroke-width="4" stroke-linecap="round"></path>
+              <path d="M35 95 C108 105 132 109 180 94 S253 82 325 95" fill="none" stroke="#0f8f83" stroke-width="4" stroke-linecap="round"></path>
+              <path d="M35 125 H325" fill="none" stroke="#b77900" stroke-width="4" stroke-linecap="round"></path>
+              <path d="M35 155 C108 145 132 141 180 156 S253 168 325 155" fill="none" stroke="#d65645" stroke-width="4" stroke-linecap="round"></path>
+              <path d="M35 195 C105 175 129 175 180 195 S258 215 325 195" fill="none" stroke="#1d64d8" stroke-width="4" stroke-linecap="round"></path>
+              <path d="M180 59 C203 91 203 159 180 191 C157 159 157 91 180 59" fill="none" stroke="#6f55c7" stroke-width="4" stroke-linecap="round" opacity="0.75"></path>
+            </svg>
+          </span>
+          <span class="card-body">
+            <span class="kicker">Dielectric media</span>
+            <h3>Dielectric Sphere Fields</h3>
+            <p>View a central slice through a dielectric sphere in a uniform electric field while varying the sphere permittivity.</p>
+            <span class="equation">&beta; = (&epsilon;<sub>s</sub> - &epsilon;<sub>m</sub>) / (&epsilon;<sub>s</sub> + 2&epsilon;<sub>m</sub>)</span>
+            <span class="open-label">Open demo &rarr;</span>
+          </span>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      EM Fields and Waves Demonstrations | English portal
+    </footer>
+  </main>
+</body>
+</html>

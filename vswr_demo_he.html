@@ -1,0 +1,1045 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>הדגמת יחס גל עומד במתח</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #617089;
+      --line: #d8e0ea;
+      --blue: #1d64d8;
+      --teal: #0f9f8f;
+      --coral: #d75b4b;
+      --amber: #b77900;
+      --shadow: 0 18px 45px rgba(29, 44, 73, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      direction: rtl;
+      text-align: right;
+      background:
+        linear-gradient(180deg, rgba(246, 248, 251, 0.98), rgba(235, 241, 248, 0.96)),
+        radial-gradient(circle at 80% 8%, rgba(15, 159, 143, 0.14), transparent 34%),
+        radial-gradient(circle at 8% 18%, rgba(215, 91, 75, 0.10), transparent 30%);
+      color: var(--ink);
+    }
+
+    main {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 26px 0 34px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: end;
+      padding: 4px 0 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 3.6vw, 3.15rem);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.55;
+    }
+
+    .portal-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      margin-top: 14px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 8px 24px rgba(29, 44, 73, 0.08);
+      color: var(--blue);
+      font-size: 0.93rem;
+      font-weight: 700;
+      line-height: 1.2;
+      text-decoration: none;
+    }
+
+    .portal-link:hover {
+      border-color: rgba(29, 100, 216, 0.45);
+      background: #ffffff;
+    }
+
+    .portal-link:focus-visible {
+      outline: 3px solid rgba(29, 100, 216, 0.34);
+      outline-offset: 3px;
+    }
+
+    .formula {
+      justify-self: end;
+      direction: ltr;
+      text-align: left;
+      unicode-bidi: isolate;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 8px 24px rgba(29, 44, 73, 0.08);
+      color: #24324a;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.9rem;
+      line-height: 1.45;
+      max-width: 560px;
+      white-space: normal;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .plot-panel,
+    .controls {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow);
+    }
+
+    .plot-panel {
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .plot-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .plot-title {
+      min-width: 0;
+    }
+
+    .plot-title h2,
+    .controls h2 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+    .plot-title p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px 14px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .swatch {
+      width: 22px;
+      height: 3px;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+    .swatch.snapshots {
+      background: linear-gradient(90deg, rgba(29, 100, 216, 0.36), rgba(15, 159, 143, 0.36), rgba(215, 91, 75, 0.36));
+    }
+
+    .swatch.max {
+      background: var(--coral);
+    }
+
+    .swatch.min {
+      background: var(--teal);
+    }
+
+    .canvas-wrap {
+      position: relative;
+      height: clamp(330px, 54vh, 520px);
+      min-height: 320px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #gammaCanvas {
+      cursor: grab;
+      touch-action: none;
+    }
+
+    #gammaCanvas.dragging {
+      cursor: grabbing;
+    }
+
+    .readouts {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    .metric {
+      padding: 14px 16px;
+      border-right: 1px solid var(--line);
+      min-width: 0;
+    }
+
+    .metric:last-child {
+      border-right: 0;
+    }
+
+    .metric b {
+      display: block;
+      font-size: clamp(1.1rem, 2.5vw, 1.55rem);
+      line-height: 1.1;
+      letter-spacing: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.25;
+    }
+
+    .controls {
+      padding: 17px 18px 19px;
+    }
+
+    .control-note {
+      margin: 6px 0 16px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .slider-block {
+      display: grid;
+      gap: 9px;
+      margin: 0 0 18px;
+    }
+
+    label {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    output {
+      direction: ltr;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      color: var(--blue);
+      font-size: 0.86rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      direction: ltr;
+      accent-color: var(--blue);
+    }
+
+    input[type="number"] {
+      width: 84px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 7px 9px;
+      color: var(--ink);
+      background: #ffffff;
+      font: inherit;
+      direction: ltr;
+      text-align: right;
+    }
+
+    .plane {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f9fbfd;
+      overflow: hidden;
+    }
+
+    .plane-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 11px 12px 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .plane-canvas {
+      height: 230px;
+    }
+
+    .phase-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .load-panel {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px 12px;
+      background: #f9fbfd;
+    }
+
+    .load-head {
+      display: grid;
+      gap: 10px;
+    }
+
+    .load-head h3 {
+      margin: 0;
+      font-size: 0.95rem;
+      letter-spacing: 0;
+    }
+
+    .z0-control {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .z0-input-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      direction: ltr;
+      color: var(--ink);
+    }
+
+    .impedance-formula {
+      margin: 11px 0;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: #ffffff;
+      color: #24324a;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.78rem;
+      direction: ltr;
+      text-align: center;
+    }
+
+    .load-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .load-panel .mini b {
+      direction: ltr;
+      text-align: left;
+    }
+
+    .mini {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 11px 12px;
+      background: #ffffff;
+      min-width: 0;
+    }
+
+    .mini b {
+      display: block;
+      font-size: 1.02rem;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mini span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.25;
+    }
+
+    .hint {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 920px) {
+      header,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .formula {
+        justify-self: stretch;
+        white-space: normal;
+      }
+
+      .controls {
+        order: -1;
+      }
+    }
+
+    @media (max-width: 680px) {
+      main {
+        width: min(100vw - 20px, 1180px);
+        padding-top: 16px;
+      }
+
+      .plot-toolbar,
+      .readouts,
+      .phase-row,
+      .load-row {
+        grid-template-columns: 1fr;
+      }
+
+      .plot-toolbar {
+        display: grid;
+      }
+
+      .legend {
+        justify-content: flex-start;
+      }
+
+      .readouts {
+        display: grid;
+      }
+
+      .metric {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .metric:last-child {
+        border-bottom: 0;
+      }
+
+      .canvas-wrap {
+        height: 360px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>יחס גל עומד במתח</h1>
+        <p class="subtitle">
+          שנו את מקדם ההחזרה המרוכב וצפו בשש-עשרה תמונות זמן דהויות של המתח הממשי הרגעי לאורך קו תמסורת. השיאים והאפסים נקבעים על ידי הגודל של &Gamma;, והפאזה של &Gamma; מזיזה את התבנית לאורך הקו.
+        </p>
+        <a class="portal-link" href="portal_he.html">חזרה לפורטל</a>
+      </div>
+      <div class="formula" aria-label="נוסחת גל עומד">
+        Re[V(z,t)] = Re{(e<sup>-j2&pi;z/&lambda;</sup> + &Gamma;e<sup>j2&pi;z/&lambda;</sup>)e<sup>j&omega;t</sup>}<br>
+        <span dir="rtl">מעטפת</span> = &plusmn;|e<sup>-j2&pi;z/&lambda;</sup> + &Gamma;e<sup>j2&pi;z/&lambda;</sup>|<br>
+        VSWR = (1 + |&Gamma;|) / (1 - |&Gamma;|)
+      </div>
+    </header>
+
+    <section class="layout">
+      <article class="plot-panel" aria-label="גרף גל עומד">
+        <div class="plot-toolbar">
+          <div class="plot-title">
+            <h2>מתח ממשי רגעי לאורך 3 אורכי גל</h2>
+            <p>שש-עשרה עקומות דהויות מדגימות ערכים שווי-מרווח של &omega;t; העקומות המקווקוות הן המעטפת.</p>
+          </div>
+          <div class="legend" aria-label="מקרא הגרף">
+            <span><i class="swatch snapshots"></i>תמונות זמן: Re[V(z,t)]</span>
+            <span><i class="swatch max"></i>+ מעטפת</span>
+            <span><i class="swatch min"></i>- מעטפת</span>
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="waveCanvas" aria-label="גרף גל עומד"></canvas>
+        </div>
+        <div class="readouts">
+          <div class="metric">
+            <b id="vswrValue">1.00</b>
+            <span>יג״ע במתח (VSWR)</span>
+          </div>
+          <div class="metric">
+            <b id="gammaMag">0.00</b>
+            <span>|&Gamma;|</span>
+          </div>
+          <div class="metric">
+            <b id="vmaxValue">1.00</b>
+            <span>Vmax / Vinc</span>
+          </div>
+          <div class="metric">
+            <b id="vminValue">1.00</b>
+            <span>Vmin / Vinc</span>
+          </div>
+        </div>
+      </article>
+
+      <aside class="controls" aria-label="בקרות מקדם ההחזרה">
+        <h2>מקדם ההחזרה</h2>
+        <p class="control-note">
+          גררו את הסמן הכחול או השתמשו בסליידרים. הגודל קובע את יחס הגל העומד; הפאזה מזיזה את תבנית הגל העומד לאורך הקו.
+        </p>
+
+        <div class="slider-block">
+          <label for="magSlider">
+            <span>גודל, |&Gamma;|</span>
+            <output id="magOut" for="magSlider">0.47</output>
+          </label>
+          <input id="magSlider" type="range" min="0" max="0.99" step="0.01" value="0.47">
+        </div>
+
+        <div class="slider-block">
+          <label for="phaseSlider">
+            <span>פאזה, angle(&Gamma;)</span>
+            <output id="phaseOut" for="phaseSlider">32°</output>
+          </label>
+          <input id="phaseSlider" type="range" min="-180" max="180" step="1" value="32">
+        </div>
+
+        <div class="plane">
+          <div class="plane-head">
+            <span>מישור &Gamma;</span>
+            <span id="limitNote">אפשר לגרור את הסמן</span>
+          </div>
+          <div class="plane-canvas">
+            <canvas id="gammaCanvas" aria-label="מישור מקדם ההחזרה המרוכב"></canvas>
+          </div>
+        </div>
+
+        <div class="phase-row">
+          <div class="mini">
+            <b id="realValue">0.40</b>
+            <span>Re(&Gamma;)</span>
+          </div>
+          <div class="mini">
+            <b id="imagValue">0.25</b>
+            <span>Im(&Gamma;)</span>
+          </div>
+        </div>
+
+        <div class="load-panel" aria-label="חישוב עכבת העומס">
+          <div class="load-head">
+            <h3>עכבת העומס הדרושה</h3>
+            <label class="z0-control" for="z0Input">
+              <span>עכבת הקו Z0</span>
+              <span class="z0-input-wrap"><input id="z0Input" type="number" min="1" max="1000" step="1" value="50"><span>&Omega;</span></span>
+            </label>
+          </div>
+          <div class="impedance-formula">
+            Z<sub>L</sub> = Z<sub>0</sub>(1 + &Gamma;) / (1 - &Gamma;)
+          </div>
+          <div class="load-row">
+            <div class="mini">
+              <b id="zNormValue">1.00 + j0.00</b>
+              <span>עכבה מנורמלת Z<sub>L</sub> / Z<sub>0</sub></span>
+            </div>
+            <div class="mini">
+              <b id="zLoadValue">50.00 + j0.00 &Omega;</b>
+              <span>עכבת עומס Z<sub>L</sub></span>
+            </div>
+          </div>
+        </div>
+
+        <p class="hint">
+          ככל ש-|&Gamma;| גדול יותר, המעטפת מקבלת שקעים עמוקים יותר ושיאים גבוהים יותר. שינוי הזווית משאיר את יחס הגל העומד קבוע, אבל מזיז את התבנית לאורך z.
+        </p>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const LIMIT = 0.99;
+    const PERIODS = 3;
+    const POINTS = 900;
+    const PHASE_COUNT = 16;
+
+    const magSlider = document.getElementById("magSlider");
+    const phaseSlider = document.getElementById("phaseSlider");
+    const magOut = document.getElementById("magOut");
+    const phaseOut = document.getElementById("phaseOut");
+    const z0Input = document.getElementById("z0Input");
+    const waveCanvas = document.getElementById("waveCanvas");
+    const gammaCanvas = document.getElementById("gammaCanvas");
+    let isDraggingGamma = false;
+
+    const readout = {
+      vswr: document.getElementById("vswrValue"),
+      mag: document.getElementById("gammaMag"),
+      vmax: document.getElementById("vmaxValue"),
+      vmin: document.getElementById("vminValue"),
+      real: document.getElementById("realValue"),
+      imag: document.getElementById("imagValue"),
+      zNorm: document.getElementById("zNormValue"),
+      zLoad: document.getElementById("zLoadValue")
+    };
+
+    function resizeCanvas(canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const scale = window.devicePixelRatio || 1;
+      const width = Math.max(1, Math.round(rect.width * scale));
+      const height = Math.max(1, Math.round(rect.height * scale));
+
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      return { ctx, width: rect.width, height: rect.height };
+    }
+
+    function nice(value, digits = 2) {
+      if (!Number.isFinite(value)) {
+        return "infinite";
+      }
+      return value.toFixed(digits);
+    }
+
+    function formatComplex(real, imag, digits = 2, unit = "") {
+      const sign = imag < 0 ? " - j" : " + j";
+      const suffix = unit ? " " + unit : "";
+      return real.toFixed(digits) + sign + Math.abs(imag).toFixed(digits) + suffix;
+    }
+
+    function loadImpedance(real, imag, z0) {
+      const numReal = 1 + real;
+      const numImag = imag;
+      const denReal = 1 - real;
+      const denImag = -imag;
+      const denMagSq = denReal * denReal + denImag * denImag;
+      const normReal = (numReal * denReal + numImag * denImag) / denMagSq;
+      const normImag = (numImag * denReal - numReal * denImag) / denMagSq;
+
+      return {
+        normReal,
+        normImag,
+        loadReal: z0 * normReal,
+        loadImag: z0 * normImag
+      };
+    }
+
+    function voltagePhasor(x, real, imag) {
+      const angle = 2 * Math.PI * x;
+      return {
+        real: Math.cos(angle) + real * Math.cos(angle) - imag * Math.sin(angle),
+        imag: -Math.sin(angle) + real * Math.sin(angle) + imag * Math.cos(angle)
+      };
+    }
+
+    function voltageMagnitude(x, real, imag) {
+      const phasor = voltagePhasor(x, real, imag);
+      return Math.hypot(phasor.real, phasor.imag);
+    }
+
+    function realVoltage(x, timePhase, real, imag) {
+      const phasor = voltagePhasor(x, real, imag);
+      return phasor.real * Math.cos(timePhase) - phasor.imag * Math.sin(timePhase);
+    }
+
+    function snapshotColor(index) {
+      const hue = Math.round((215 + index * 360 / PHASE_COUNT) % 360);
+      return `hsl(${hue} 58% 42%)`;
+    }
+
+    function drawGrid(ctx, plot, yLimit) {
+      ctx.save();
+      ctx.strokeStyle = "#dbe4ee";
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#617089";
+      ctx.font = "12px Inter, system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+
+      const yFor = y => plot.top + ((yLimit - y) / (2 * yLimit)) * plot.height;
+
+      for (let x = 0; x <= PERIODS; x += 0.5) {
+        const px = plot.left + (x / PERIODS) * plot.width;
+        ctx.beginPath();
+        ctx.moveTo(px, plot.top);
+        ctx.lineTo(px, plot.bottom);
+        ctx.stroke();
+        ctx.fillText(x.toFixed(x % 1 === 0 ? 0 : 1), px, plot.bottom + 10);
+      }
+
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      const yStep = 0.5;
+      for (let y = -yLimit; y <= yLimit + 0.001; y += yStep) {
+        const py = yFor(y);
+        ctx.strokeStyle = Math.abs(y) < 0.001 ? "#9fb0c5" : "#dbe4ee";
+        ctx.lineWidth = Math.abs(y) < 0.001 ? 1.5 : 1;
+        ctx.beginPath();
+        ctx.moveTo(plot.left, py);
+        ctx.lineTo(plot.right, py);
+        ctx.stroke();
+        ctx.fillText(y.toFixed(1), plot.left - 9, py);
+      }
+
+      ctx.fillStyle = "#172033";
+      ctx.font = "700 12px Inter, system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.direction = "rtl";
+      ctx.fillText("מיקום z / אורך גל", plot.left + plot.width / 2, plot.bottom + 42);
+
+      ctx.save();
+      ctx.translate(16, plot.top + plot.height / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = "center";
+      ctx.direction = "rtl";
+      ctx.fillText("מתח ממשי מנורמל", 0, 0);
+      ctx.restore();
+      ctx.restore();
+    }
+
+    function drawWave(real, imag, mag) {
+      const { ctx, width, height } = resizeCanvas(waveCanvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const vmax = 1 + mag;
+      const vmin = Math.max(0, 1 - mag);
+      const yLimit = Math.max(2, Math.ceil((vmax + 0.16) * 2) / 2);
+      const plot = {
+        left: Math.min(72, Math.max(54, width * 0.10)),
+        right: width - 24,
+        top: 24,
+        bottom: height - 62
+      };
+      plot.width = plot.right - plot.left;
+      plot.height = plot.bottom - plot.top;
+
+      drawGrid(ctx, plot, yLimit);
+
+      const yFor = y => plot.top + ((yLimit - y) / (2 * yLimit)) * plot.height;
+      const xFor = x => plot.left + (x / PERIODS) * plot.width;
+
+      for (let phaseIndex = 0; phaseIndex < PHASE_COUNT; phaseIndex += 1) {
+        const timePhase = phaseIndex * 2 * Math.PI / PHASE_COUNT;
+        drawCurve(ctx, xFor, yFor, x => realVoltage(x, timePhase, real, imag), {
+          color: snapshotColor(phaseIndex),
+          width: 1.25,
+          alpha: 0.30
+        });
+      }
+
+      ctx.save();
+      ctx.lineWidth = 2.4;
+      ctx.setLineDash([7, 6]);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      ctx.strokeStyle = "#d75b4b";
+      drawEnvelopeCurve(ctx, xFor, yFor, x => voltageMagnitude(x, real, imag));
+
+      ctx.strokeStyle = "#0f9f8f";
+      drawEnvelopeCurve(ctx, xFor, yFor, x => -voltageMagnitude(x, real, imag));
+      ctx.restore();
+
+      drawExtremaMarkers(ctx, plot, real, imag, mag, yFor, xFor);
+    }
+
+    function drawCurve(ctx, xFor, yFor, valueAt, options) {
+      ctx.save();
+      ctx.globalAlpha = options.alpha ?? 1;
+      ctx.strokeStyle = options.color;
+      ctx.lineWidth = options.width;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.beginPath();
+
+      for (let i = 0; i <= POINTS; i += 1) {
+        const x = (i / POINTS) * PERIODS;
+        const px = xFor(x);
+        const py = yFor(valueAt(x));
+        if (i === 0) {
+          ctx.moveTo(px, py);
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawEnvelopeCurve(ctx, xFor, yFor, valueAt) {
+      ctx.beginPath();
+      for (let i = 0; i <= POINTS; i += 1) {
+        const x = (i / POINTS) * PERIODS;
+        const px = xFor(x);
+        const py = yFor(valueAt(x));
+        if (i === 0) {
+          ctx.moveTo(px, py);
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+      ctx.stroke();
+    }
+
+    function drawExtremaMarkers(ctx, plot, real, imag, mag, yFor, xFor) {
+      if (mag < 0.001) {
+        return;
+      }
+
+      const phase = Math.atan2(imag, real);
+      const firstMax = wrap01(-phase / (4 * Math.PI));
+      const firstMin = wrap01((Math.PI - phase) / (4 * Math.PI));
+      const maxX = firstMax <= PERIODS ? firstMax : firstMax - 0.5;
+      const minX = firstMin <= PERIODS ? firstMin : firstMin - 0.5;
+
+      ctx.save();
+      ctx.font = "700 12px Inter, system-ui, sans-serif";
+      ctx.textAlign = "center";
+
+      marker(maxX, 1 + mag, "#d75b4b", "שיא");
+      marker(minX, 1 - mag, "#0f9f8f", "שפל");
+
+      function marker(x, y, color, label) {
+        const px = xFor(x);
+        const py = yFor(y);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([4, 7]);
+        ctx.beginPath();
+        ctx.moveTo(px, plot.top);
+        ctx.lineTo(px, plot.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(px, py, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillText(label, px, Math.max(plot.top + 14, py - 14));
+      }
+
+      ctx.restore();
+    }
+
+    function wrap01(value) {
+      let wrapped = value % 0.5;
+      if (wrapped < 0) {
+        wrapped += 0.5;
+      }
+      return wrapped;
+    }
+
+    function drawGammaPlane(real, imag, mag) {
+      const { ctx, width, height } = resizeCanvas(gammaCanvas);
+      ctx.clearRect(0, 0, width, height);
+
+      const size = Math.min(width, height) * 0.76;
+      const cx = width / 2;
+      const cy = height / 2 + 4;
+      const r = size / 2;
+
+      ctx.save();
+      ctx.strokeStyle = "#d8e0ea";
+      ctx.lineWidth = 1;
+
+      for (let tick = -1; tick <= 1; tick += 0.5) {
+        const x = cx + tick * r;
+        const y = cy - tick * r;
+        ctx.beginPath();
+        ctx.moveTo(x, cy - r);
+        ctx.lineTo(x, cy + r);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx - r, y);
+        ctx.lineTo(cx + r, y);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = "#617089";
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(cx - r - 8, cy);
+      ctx.lineTo(cx + r + 8, cy);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + r + 8);
+      ctx.lineTo(cx, cy - r - 8);
+      ctx.stroke();
+
+      ctx.strokeStyle = "#9fb0c5";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
+
+      const px = cx + real * r;
+      const py = cy - imag * r;
+      ctx.strokeStyle = "#1d64d8";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(px, py);
+      ctx.stroke();
+
+      ctx.fillStyle = "#1d64d8";
+      ctx.beginPath();
+      ctx.arc(px, py, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#172033";
+      ctx.font = "700 12px Inter, system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Re", cx + r + 20, cy - 8);
+      ctx.fillText("Im", cx + 18, cy - r - 10);
+
+      ctx.fillStyle = "#617089";
+      ctx.font = "12px Inter, system-ui, sans-serif";
+      ctx.direction = "ltr";
+      ctx.fillText("|Gamma| = " + mag.toFixed(2), cx, cy + r + 24);
+      ctx.restore();
+    }
+
+    function setGammaFromPointer(event) {
+      const rect = gammaCanvas.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+      const r = Math.min(width, height) * 0.76 / 2;
+      const cx = width / 2;
+      const cy = height / 2 + 4;
+
+      let real = (event.clientX - rect.left - cx) / r;
+      let imag = (cy - (event.clientY - rect.top)) / r;
+      let mag = Math.hypot(real, imag);
+
+      if (mag > LIMIT) {
+        real = real / mag * LIMIT;
+        imag = imag / mag * LIMIT;
+        mag = LIMIT;
+      }
+
+      let phase = Math.atan2(imag, real) * 180 / Math.PI;
+      if (Math.abs(phase - 180) < 0.0001) {
+        phase = -180;
+      }
+
+      magSlider.value = mag.toFixed(2);
+      phaseSlider.value = phase.toFixed(0);
+      update();
+    }
+
+    function beginGammaDrag(event) {
+      event.preventDefault();
+      isDraggingGamma = true;
+      gammaCanvas.classList.add("dragging");
+      if (gammaCanvas.setPointerCapture) {
+        gammaCanvas.setPointerCapture(event.pointerId);
+      }
+      setGammaFromPointer(event);
+    }
+
+    function moveGammaDrag(event) {
+      if (!isDraggingGamma) {
+        return;
+      }
+      event.preventDefault();
+      setGammaFromPointer(event);
+    }
+
+    function endGammaDrag(event) {
+      isDraggingGamma = false;
+      if (gammaCanvas.hasPointerCapture && gammaCanvas.hasPointerCapture(event.pointerId)) {
+        gammaCanvas.releasePointerCapture(event.pointerId);
+      }
+      gammaCanvas.classList.remove("dragging");
+    }
+
+    function update() {
+      const mag = Math.min(LIMIT, Math.max(0, Number(magSlider.value)));
+      const phase = Number(phaseSlider.value);
+      const phaseRad = phase * Math.PI / 180;
+      const real = mag * Math.cos(phaseRad);
+      const imag = mag * Math.sin(phaseRad);
+      const vswr = (1 + mag) / Math.max(0.0001, 1 - mag);
+      const parsedZ0 = Number(z0Input.value);
+      const z0 = Number.isFinite(parsedZ0) && parsedZ0 > 0 ? parsedZ0 : 50;
+      const impedance = loadImpedance(real, imag, z0);
+
+      magSlider.value = mag.toFixed(2);
+      magOut.textContent = mag.toFixed(2);
+      phaseOut.textContent = phase.toFixed(0) + "°";
+      readout.vswr.textContent = nice(vswr, 2);
+      readout.mag.textContent = mag.toFixed(2);
+      readout.vmax.textContent = (1 + mag).toFixed(2);
+      readout.vmin.textContent = (1 - mag).toFixed(2);
+      readout.real.textContent = real.toFixed(2);
+      readout.imag.textContent = imag.toFixed(2);
+      readout.zNorm.textContent = formatComplex(impedance.normReal, impedance.normImag);
+      readout.zLoad.textContent = formatComplex(impedance.loadReal, impedance.loadImag, 2, "Ω");
+
+      drawWave(real, imag, mag);
+      drawGammaPlane(real, imag, mag);
+    }
+
+    magSlider.addEventListener("input", update);
+    phaseSlider.addEventListener("input", update);
+    z0Input.addEventListener("input", update);
+    gammaCanvas.addEventListener("pointerdown", beginGammaDrag);
+    gammaCanvas.addEventListener("pointermove", moveGammaDrag);
+    gammaCanvas.addEventListener("pointerup", endGammaDrag);
+    gammaCanvas.addEventListener("pointercancel", endGammaDrag);
+    window.addEventListener("resize", () => update());
+    update();
+  </script>
+</body>
+</html>
