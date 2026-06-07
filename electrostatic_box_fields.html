@@ -417,6 +417,7 @@
             <span class="control-head">Boundary profile</span>
             <select id="profile">
               <option value="constant" selected>Constant V0</option>
+              <option value="half-step">Half V0, half 0</option>
               <option value="center-sine">Center sine</option>
               <option value="two-hot-spots">Two hot spots</option>
               <option value="left-ramp">Ramp 0 to V0</option>
@@ -487,6 +488,7 @@
     const WALLS = ["top", "right", "bottom", "left"];
     const PROFILE_LABELS = {
       "constant": "Constant V0",
+      "half-step": "Half V0, half 0",
       "center-sine": "Center sine",
       "two-hot-spots": "Two hot spots",
       "left-ramp": "Ramp 0 to V0"
@@ -594,6 +596,9 @@
 
     function boundaryProfileValue(profile, u, v0) {
       const t = clamp(u, 0, 1);
+      if (profile === "half-step") {
+        return t < 0.5 ? v0 : 0;
+      }
       if (profile === "center-sine") {
         return v0 * Math.sin(Math.PI * t);
       }

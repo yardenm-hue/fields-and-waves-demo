@@ -422,6 +422,7 @@
             <span class="control-head">פרופיל שפה</span>
             <select id="profile">
               <option value="constant" selected>קבוע V0</option>
+              <option value="half-step">חצי V0 וחצי 0</option>
               <option value="center-sine">סינוס מרכזי</option>
               <option value="two-hot-spots">שני מוקדים חמים</option>
               <option value="left-ramp">רמפה מ-0 עד V0</option>
@@ -492,6 +493,7 @@
     const WALLS = ["top", "right", "bottom", "left"];
     const PROFILE_LABELS = {
       "constant": "קבוע V0",
+      "half-step": "חצי V0 וחצי 0",
       "center-sine": "סינוס מרכזי",
       "two-hot-spots": "שני מוקדים חמים",
       "left-ramp": "רמפה מ-0 עד V0"
@@ -605,6 +607,9 @@
 
     function boundaryProfileValue(profile, u, v0) {
       const t = clamp(u, 0, 1);
+      if (profile === "half-step") {
+        return t < 0.5 ? v0 : 0;
+      }
       if (profile === "center-sine") {
         return v0 * Math.sin(Math.PI * t);
       }
