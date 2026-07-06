@@ -1,0 +1,1483 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Line Sources at a Material Interface</title>
+  <script data-goatcounter="https://emftau.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #617089;
+      --line: #d8e0ea;
+      --blue: #1d64d8;
+      --teal: #0f8f83;
+      --coral: #d65645;
+      --amber: #b77900;
+      --violet: #6f55c7;
+      --positive: #b42d82;
+      --negative: #0c8891;
+      --shadow: 0 18px 45px rgba(29, 44, 73, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #f8fafc 0%, #edf3f9 100%);
+      color: var(--ink);
+    }
+
+    main {
+      width: min(1200px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 26px 0 34px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: end;
+      padding: 4px 0 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2.45rem;
+      line-height: 1.04;
+      letter-spacing: 0;
+      overflow-wrap: break-word;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      max-width: 790px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.55;
+      overflow-wrap: break-word;
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .portal-link,
+    .language-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 8px 24px rgba(29, 44, 73, 0.08);
+      color: var(--blue);
+      font-size: 0.93rem;
+      font-weight: 700;
+      line-height: 1.2;
+      text-decoration: none;
+    }
+
+    .portal-link:hover,
+    .language-link:hover {
+      border-color: rgba(29, 100, 216, 0.45);
+      background: #ffffff;
+    }
+
+    .portal-link:focus-visible,
+    .language-link:focus-visible,
+    button:focus-visible,
+    input:focus-visible {
+      outline: 3px solid rgba(29, 100, 216, 0.34);
+      outline-offset: 3px;
+    }
+
+    .formula {
+      justify-self: end;
+      max-width: 570px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 8px 24px rgba(29, 44, 73, 0.08);
+      color: #24324a;
+      direction: ltr;
+      text-align: left;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.83rem;
+      line-height: 1.5;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .plot-panel,
+    .controls {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow);
+    }
+
+    .plot-panel {
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .plot-toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .plot-title {
+      min-width: 0;
+    }
+
+    .plot-title h2,
+    .controls h2 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+    .status {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .legend i {
+      display: inline-block;
+      width: 26px;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--blue);
+    }
+
+    .legend .scalar {
+      height: 10px;
+      border: 1px solid rgba(23, 32, 51, 0.14);
+      background: linear-gradient(90deg, #3f6cc5, #f8fafc, #cf5947);
+    }
+
+    .legend .contour {
+      background: var(--coral);
+    }
+
+    .legend .image {
+      background: var(--teal);
+      stroke-dasharray: 7 6;
+    }
+
+    .canvas-shell {
+      height: 620px;
+      min-height: 480px;
+      background: #f8fafc;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .controls {
+      padding: 16px;
+    }
+
+    .control-group {
+      display: grid;
+      gap: 13px;
+      padding-top: 15px;
+    }
+
+    .control-row {
+      display: grid;
+      gap: 7px;
+    }
+
+    .control-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: #263047;
+      font-size: 0.9rem;
+      font-weight: 650;
+    }
+
+    output {
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: end;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f7f9fc;
+    }
+
+    .segmented label {
+      min-width: 0;
+    }
+
+    .segmented input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .segmented span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 7px 8px;
+      border-radius: 7px;
+      color: var(--muted);
+      font-size: 0.87rem;
+      font-weight: 750;
+      line-height: 1.2;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .segmented input:checked + span {
+      background: #ffffff;
+      color: var(--blue);
+      box-shadow: 0 5px 18px rgba(29, 44, 73, 0.12);
+    }
+
+    .toggles {
+      display: grid;
+      gap: 8px;
+      padding-top: 2px;
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #263047;
+      font-size: 0.9rem;
+      line-height: 1.35;
+    }
+
+    .toggle input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: var(--blue);
+      flex: 0 0 auto;
+    }
+
+    .mode-hidden {
+      display: none !important;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    button {
+      min-height: 38px;
+      border: 1px solid var(--blue);
+      border-radius: 8px;
+      background: var(--blue);
+      color: #ffffff;
+      font: inherit;
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      border-color: var(--line);
+      background: #ffffff;
+      color: var(--blue);
+    }
+
+    .readout {
+      display: grid;
+      gap: 8px;
+      margin-top: 16px;
+      padding: 13px;
+      border: 1px solid rgba(96, 112, 134, 0.2);
+      border-radius: 8px;
+      background: #f8fafc;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .readout strong {
+      color: var(--ink);
+    }
+
+    .equation-row {
+      direction: ltr;
+      text-align: left;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      color: #27344b;
+      overflow-wrap: anywhere;
+    }
+
+    footer {
+      margin-top: 24px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    html[dir="rtl"] body {
+      direction: rtl;
+    }
+
+    html[dir="rtl"] .formula,
+    html[dir="rtl"] .equation-row,
+    html[dir="rtl"] footer {
+      direction: ltr;
+      text-align: left;
+    }
+
+    @media (max-width: 980px) {
+      header,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .formula {
+        justify-self: stretch;
+      }
+
+      .plot-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .legend {
+        justify-content: flex-start;
+      }
+
+      .canvas-shell {
+        height: 560px;
+      }
+    }
+
+    @media (max-width: 620px) {
+      main {
+        width: min(100% - 22px, 1200px);
+        padding-top: 20px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .subtitle {
+        font-size: 0.97rem;
+      }
+
+      .canvas-shell {
+        height: 430px;
+        min-height: 380px;
+      }
+
+      .button-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1 data-i18n="title">Line Sources at a Material Interface</h1>
+        <p class="subtitle" data-i18n="subtitle">Use image sources to solve the field of a uniform line charge above a dielectric half-space, then switch to the dual magnetic line-current problem.</p>
+        <div class="header-actions">
+          <a class="portal-link" id="portalLink" href="portal.html" data-i18n="portal">Back to portal</a>
+          <a class="language-link" id="languageLink" href="line_interface_images.html?lang=he" lang="he" dir="rtl">עברית</a>
+        </div>
+      </div>
+      <div class="formula" id="formulaBox" aria-label="Image source formulas">
+        alpha_E = (epsilon1 - epsilon2) / (epsilon1 + epsilon2)<br>
+        lambda_img = alpha_E lambda, lambda_t = 2 epsilon2 lambda / (epsilon1 + epsilon2)<br>
+        alpha_M = (mu2 - mu1) / (mu1 + mu2)<br>
+        I_img = alpha_M I, I_t = 2 mu1 I / (mu1 + mu2)
+      </div>
+    </header>
+
+    <section class="layout" aria-label="Line source image construction applet">
+      <section class="plot-panel">
+        <div class="plot-toolbar">
+          <div class="plot-title">
+            <h2 id="plotHeading" data-i18n="plotHeading">Potential and field map</h2>
+            <p class="status" id="status">Preparing plot</p>
+          </div>
+          <div class="legend" aria-label="Plot legend">
+            <span id="scalarLegendItem"><i class="scalar"></i><span id="scalarLegend">potential</span></span>
+            <span id="contourLegendItem"><i class="contour"></i><span id="contourLegend">equipotential contours</span></span>
+            <span><i id="fieldLegendSwatch"></i><span id="fieldLegend">field lines</span></span>
+          </div>
+        </div>
+        <div class="canvas-shell">
+          <canvas id="plot" aria-label="Line-source field at a material interface"></canvas>
+        </div>
+      </section>
+
+      <aside class="controls" aria-label="Demo controls">
+        <h2 data-i18n="controls">Controls</h2>
+        <div class="control-group">
+          <div class="control-row">
+            <span class="control-head" data-i18n="problem">Problem</span>
+            <div class="segmented" role="radiogroup" aria-label="Problem type">
+              <label>
+                <input type="radio" name="mode" value="electric" checked>
+                <span data-i18n="electricMode">Electric</span>
+              </label>
+              <label>
+                <input type="radio" name="mode" value="magnetic">
+                <span data-i18n="magneticMode">Magnetic</span>
+              </label>
+            </div>
+          </div>
+
+          <label class="control-row">
+            <span class="control-head"><span id="ratioLabel">epsilon1 / epsilon2</span> <output id="ratioValue">3.00</output></span>
+            <input id="ratio" type="range" min="-1.3" max="1.3" step="0.01" value="0.48">
+          </label>
+
+          <label class="control-row">
+            <span class="control-head"><span data-i18n="height">Source height</span> <output id="heightValue">0.90 a</output></span>
+            <input id="height" type="range" min="0.35" max="1.55" step="0.02" value="0.9">
+          </label>
+
+          <label class="control-row">
+            <span class="control-head"><span id="fieldCountLabel" data-i18n="fieldLines">Field lines</span> <output id="linesValue">32</output></span>
+            <input id="lineCount" type="range" min="12" max="56" step="2" value="32">
+          </label>
+
+          <label class="control-row" id="contourControl">
+            <span class="control-head"><span data-i18n="contours">Equipotential contours</span> <output id="contoursValue">15</output></span>
+            <input id="contourCount" type="range" min="6" max="26" step="1" value="15">
+          </label>
+
+          <div class="toggles">
+            <label class="toggle" id="scalarToggle"><input id="showScalar" type="checkbox" checked> <span data-i18n="showScalar">Potential color</span></label>
+            <label class="toggle" id="contourToggle"><input id="showContours" type="checkbox" checked> <span data-i18n="showContours">Equipotential contours</span></label>
+            <label class="toggle"><input id="showFields" type="checkbox" checked> <span id="fieldToggleText" data-i18n="showFields">Field lines</span></label>
+            <label class="toggle"><input id="showImages" type="checkbox" checked> <span data-i18n="showImages">Image construction</span></label>
+          </div>
+
+          <div class="button-row">
+            <button id="equalMaterials" type="button" class="secondary" data-i18n="equalMaterials">Equal materials</button>
+            <button id="defaults" type="button" data-i18n="defaults">Defaults</button>
+          </div>
+        </div>
+
+        <div class="readout" aria-live="polite">
+          <div><strong id="modeReadout">Electric line charge</strong></div>
+          <div id="materialReadout">epsilon1 / epsilon2 = 3.02</div>
+          <div class="equation-row" id="imageReadout">lambda_img / lambda = 0.503</div>
+          <div class="equation-row" id="transReadout">lambda_t / lambda = 0.497</div>
+          <div id="boundaryReadout">Phi is continuous; epsilon E_z is continuous at z = 0.</div>
+        </div>
+      </aside>
+    </section>
+
+    <footer>
+      created by <a href="https://wavetheory.group" style="color: var(--blue); font-weight: 700;">Yarden Mazor</a>, School of ECE, Tel-Aviv University
+    </footer>
+  </main>
+
+  <script>
+    const I18N = {
+      en: {
+        title: "Line Sources at a Material Interface",
+        subtitle: "Use image sources to solve the field of a uniform line charge above a dielectric half-space, then switch to the dual magnetic line-current problem.",
+        portal: "Back to portal",
+        plotHeading: "Potential and field map",
+        controls: "Controls",
+        problem: "Problem",
+        electricMode: "Electric",
+        magneticMode: "Magnetic",
+        height: "Source height",
+        fieldLines: "Field lines",
+        fieldVectors: "Field vectors",
+        contours: "Equipotential contours",
+        showScalar: "Potential color",
+        showContours: "Equipotential contours",
+        showFields: "Field lines",
+        showElectricField: "Electric field lines",
+        showMagneticB: "Magnetic field B vectors",
+        showImages: "Image construction",
+        equalMaterials: "Equal materials",
+        defaults: "Defaults",
+        scalarElectric: "potential",
+        contourElectric: "equipotential contours",
+        fieldElectric: "electric field lines",
+        scalarMagnetic: "vector potential",
+        contourMagnetic: "A_y contours",
+        fieldMagnetic: "magnetic field B",
+        electricReadout: "Electric line charge",
+        magneticReadout: "Magnetic line current",
+        epsilonRatio: "epsilon1 / epsilon2",
+        muRatio: "mu1 / mu2",
+        electricBoundary: "Phi is continuous; epsilon E_z is continuous at z = 0.",
+        magneticBoundary: "A_y is continuous; H_x and B_z are continuous at z = 0.",
+        sourceLabelElectric: "real line charge",
+        sourceLabelMagnetic: "real line current",
+        imageLabelElectric: "image charge",
+        imageLabelMagnetic: "image current",
+        transmittedElectric: "transmitted field: lambda_t",
+        transmittedMagnetic: "transmitted field: I_t",
+        upperMaterialElectric: "epsilon1, z > 0",
+        lowerMaterialElectric: "epsilon2, z < 0",
+        upperMaterialMagnetic: "mu1, z > 0",
+        lowerMaterialMagnetic: "mu2, z < 0",
+        statusElectric: "dielectric interface by image line charge",
+        statusMagnetic: "magnetic interface by image line current"
+      },
+      he: {
+        title: "קווי מטען בסמוך לאי רציפות דיאלקטרית",
+        subtitle: "הדגמה של פתרון מטען קווי אחיד מעל חצי-מרחב דיאלקטרי בעזרת מטען דמות, עם מעבר לבעיה הדואלית של זרם קווי באי רציפות בפרמאביליות.",
+        portal: "חזרה לפורטל",
+        plotHeading: "מפת פוטנציאל ושדה",
+        controls: "בקרות",
+        problem: "בעיה",
+        electricMode: "חשמלית",
+        magneticMode: "מגנטית",
+        height: "גובה המקור",
+        fieldLines: "קווי שדה",
+        fieldVectors: "וקטורי שדה",
+        contours: "קווי פוטנציאל",
+        showScalar: "צבע פוטנציאל",
+        showContours: "קווי פוטנציאל",
+        showFields: "קווי שדה",
+        showElectricField: "קווי שדה חשמלי",
+        showMagneticB: "וקטורי שדה מגנטי B",
+        showImages: "בניית הדמות",
+        equalMaterials: "חומרים שווים",
+        defaults: "ברירת מחדל",
+        scalarElectric: "פוטנציאל",
+        contourElectric: "קווי פוטנציאל",
+        fieldElectric: "שדה חשמלי",
+        scalarMagnetic: "פוטנציאל וקטורי",
+        contourMagnetic: "קווי A_y",
+        fieldMagnetic: "שדה מגנטי B",
+        electricReadout: "מטען קווי חשמלי",
+        magneticReadout: "זרם קווי מגנטי",
+        epsilonRatio: "epsilon1 / epsilon2",
+        muRatio: "mu1 / mu2",
+        electricBoundary: "Phi רציף; epsilon E_z רציף ב-z = 0.",
+        magneticBoundary: "A_y רציף; H_x ו-B_z רציפים ב-z = 0.",
+        sourceLabelElectric: "מטען קווי אמיתי",
+        sourceLabelMagnetic: "זרם קווי אמיתי",
+        imageLabelElectric: "מטען דמות",
+        imageLabelMagnetic: "זרם דמות",
+        transmittedElectric: "השדה המועבר: lambda_t",
+        transmittedMagnetic: "השדה המועבר: I_t",
+        upperMaterialElectric: "epsilon1, z > 0",
+        lowerMaterialElectric: "epsilon2, z < 0",
+        upperMaterialMagnetic: "mu1, z > 0",
+        lowerMaterialMagnetic: "mu2, z < 0",
+        statusElectric: "ממשק דיאלקטרי באמצעות מטען דמות",
+        statusMagnetic: "ממשק מגנטי באמצעות זרם דמות"
+      }
+    };
+
+    const DOMAIN = { xmin: -3.0, xmax: 3.0, zmin: -2.25, zmax: 2.45 };
+    const HEAT_W = 260;
+    const HEAT_H = 204;
+    const EPS = 0.015;
+    const COLOR_STOPS = [
+      { t: 0.00, c: [56, 96, 178] },
+      { t: 0.24, c: [120, 177, 207] },
+      { t: 0.50, c: [248, 250, 252] },
+      { t: 0.76, c: [230, 181, 97] },
+      { t: 1.00, c: [207, 89, 71] }
+    ];
+
+    const refs = {
+      canvas: document.getElementById("plot"),
+      status: document.getElementById("status"),
+      portalLink: document.getElementById("portalLink"),
+      languageLink: document.getElementById("languageLink"),
+      formulaBox: document.getElementById("formulaBox"),
+      ratio: document.getElementById("ratio"),
+      ratioLabel: document.getElementById("ratioLabel"),
+      ratioValue: document.getElementById("ratioValue"),
+      height: document.getElementById("height"),
+      heightValue: document.getElementById("heightValue"),
+      fieldCountLabel: document.getElementById("fieldCountLabel"),
+      lineCount: document.getElementById("lineCount"),
+      linesValue: document.getElementById("linesValue"),
+      contourControl: document.getElementById("contourControl"),
+      contourCount: document.getElementById("contourCount"),
+      contoursValue: document.getElementById("contoursValue"),
+      scalarToggle: document.getElementById("scalarToggle"),
+      contourToggle: document.getElementById("contourToggle"),
+      showScalar: document.getElementById("showScalar"),
+      showContours: document.getElementById("showContours"),
+      showFields: document.getElementById("showFields"),
+      showImages: document.getElementById("showImages"),
+      equalMaterials: document.getElementById("equalMaterials"),
+      defaults: document.getElementById("defaults"),
+      scalarLegendItem: document.getElementById("scalarLegendItem"),
+      scalarLegend: document.getElementById("scalarLegend"),
+      contourLegendItem: document.getElementById("contourLegendItem"),
+      contourLegend: document.getElementById("contourLegend"),
+      fieldLegendSwatch: document.getElementById("fieldLegendSwatch"),
+      fieldLegend: document.getElementById("fieldLegend"),
+      fieldToggleText: document.getElementById("fieldToggleText"),
+      modeReadout: document.getElementById("modeReadout"),
+      materialReadout: document.getElementById("materialReadout"),
+      imageReadout: document.getElementById("imageReadout"),
+      transReadout: document.getElementById("transReadout"),
+      boundaryReadout: document.getElementById("boundaryReadout"),
+      modeInputs: Array.from(document.querySelectorAll("input[name='mode']"))
+    };
+
+    const state = {
+      lang: new URLSearchParams(window.location.search).get("lang") === "he" ? "he" : "en",
+      heat: null,
+      lastKey: ""
+    };
+
+    function t(key) {
+      return I18N[state.lang][key] || I18N.en[key] || key;
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = state.lang;
+      document.documentElement.dir = state.lang === "he" ? "rtl" : "ltr";
+      document.title = t("title");
+      document.querySelectorAll("[data-i18n]").forEach((el) => {
+        el.textContent = t(el.dataset.i18n);
+      });
+      refs.portalLink.href = state.lang === "he" ? "portal_he.html" : "portal.html";
+      refs.languageLink.href = state.lang === "he" ? "line_interface_images.html" : "line_interface_images.html?lang=he";
+      refs.languageLink.textContent = state.lang === "he" ? "English" : "עברית";
+      refs.languageLink.lang = state.lang === "he" ? "en" : "he";
+      refs.languageLink.dir = state.lang === "he" ? "ltr" : "rtl";
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function lerp(a, b, f) {
+      return a + (b - a) * f;
+    }
+
+    function materialRatio() {
+      return Math.pow(10, Number(refs.ratio.value));
+    }
+
+    function activeMode() {
+      const checked = refs.modeInputs.find((input) => input.checked);
+      return checked ? checked.value : "electric";
+    }
+
+    function controls() {
+      const mode = activeMode();
+      return {
+        mode,
+        ratio: materialRatio(),
+        height: Number(refs.height.value),
+        lineCount: Number(refs.lineCount.value),
+        contourCount: Number(refs.contourCount.value),
+        showScalar: mode === "electric" && refs.showScalar.checked,
+        showContours: mode === "electric" && refs.showContours.checked,
+        showFields: refs.showFields.checked,
+        showImages: refs.showImages.checked
+      };
+    }
+
+    function coefficients(c) {
+      const r = c.ratio;
+      if (c.mode === "electric") {
+        const alpha = (r - 1) / (r + 1);
+        return {
+          upper: r,
+          lower: 1,
+          image: alpha,
+          transmitted: 2 / (r + 1),
+          scalarScaleUpper: r,
+          scalarScaleLower: 1,
+          sign: 1
+        };
+      }
+      const image = (1 - r) / (1 + r);
+      return {
+        upper: r,
+        lower: 1,
+        image,
+        transmitted: 2 * r / (r + 1),
+        scalarScaleUpper: r,
+        scalarScaleLower: 1,
+        sign: 1
+      };
+    }
+
+    function sourcePoints(c) {
+      return {
+        real: { x: 0, z: c.height },
+        image: { x: 0, z: -c.height }
+      };
+    }
+
+    function safeLogDistance(dx, dz) {
+      return Math.log(Math.sqrt(dx * dx + dz * dz + EPS * EPS));
+    }
+
+    function scalarAt(x, z, c) {
+      const k = coefficients(c);
+      const p = sourcePoints(c);
+      const rdx = x - p.real.x;
+      const rdz = z - p.real.z;
+      if (z >= 0) {
+        const idx = x - p.image.x;
+        const idz = z - p.image.z;
+        const sum = safeLogDistance(rdx, rdz) + k.image * safeLogDistance(idx, idz);
+        return c.mode === "electric" ? -sum / k.upper : -k.upper * sum;
+      }
+      const sum = k.transmitted * safeLogDistance(rdx, rdz);
+      return c.mode === "electric" ? -sum / k.lower : -k.lower * sum;
+    }
+
+    function electroVector(x, z, c) {
+      const k = coefficients(c);
+      const p = sourcePoints(c);
+      const rdx = x - p.real.x;
+      const rdz = z - p.real.z;
+      const r2 = rdx * rdx + rdz * rdz + EPS * EPS;
+      if (z >= 0) {
+        const idx = x - p.image.x;
+        const idz = z - p.image.z;
+        const i2 = idx * idx + idz * idz + EPS * EPS;
+        return {
+          x: (rdx / r2 + k.image * idx / i2) / k.upper,
+          z: (rdz / r2 + k.image * idz / i2) / k.upper
+        };
+      }
+      return {
+        x: k.transmitted * rdx / r2,
+        z: k.transmitted * rdz / r2
+      };
+    }
+
+    function magneticVector(x, z, c) {
+      const k = coefficients(c);
+      const p = sourcePoints(c);
+      const rdx = x - p.real.x;
+      const rdz = z - p.real.z;
+      const r2 = rdx * rdx + rdz * rdz + EPS * EPS;
+      if (z >= 0) {
+        const idx = x - p.image.x;
+        const idz = z - p.image.z;
+        const i2 = idx * idx + idz * idz + EPS * EPS;
+        return {
+          x: k.upper * (rdz / r2 + k.image * idz / i2),
+          z: -k.upper * (rdx / r2 + k.image * idx / i2)
+        };
+      }
+      return {
+        x: k.lower * k.transmitted * rdz / r2,
+        z: -k.lower * k.transmitted * rdx / r2
+      };
+    }
+
+    function vectorAt(x, z, c) {
+      return c.mode === "electric" ? electroVector(x, z, c) : magneticVector(x, z, c);
+    }
+
+    function valueColor(tValue, alpha) {
+      const v = clamp(tValue, 0, 1);
+      let left = COLOR_STOPS[0];
+      let right = COLOR_STOPS[COLOR_STOPS.length - 1];
+      for (let i = 0; i < COLOR_STOPS.length - 1; i++) {
+        if (v >= COLOR_STOPS[i].t && v <= COLOR_STOPS[i + 1].t) {
+          left = COLOR_STOPS[i];
+          right = COLOR_STOPS[i + 1];
+          break;
+        }
+      }
+      const local = (v - left.t) / Math.max(0.0001, right.t - left.t);
+      return [
+        Math.round(lerp(left.c[0], right.c[0], local)),
+        Math.round(lerp(left.c[1], right.c[1], local)),
+        Math.round(lerp(left.c[2], right.c[2], local)),
+        alpha
+      ];
+    }
+
+    function percentile(values, f) {
+      if (!values.length) return 0;
+      const sorted = values.slice().sort((a, b) => a - b);
+      const index = clamp(Math.floor((sorted.length - 1) * f), 0, sorted.length - 1);
+      return sorted[index];
+    }
+
+    function worldFromHeat(ix, iz) {
+      return {
+        x: lerp(DOMAIN.xmin, DOMAIN.xmax, ix / (HEAT_W - 1)),
+        z: lerp(DOMAIN.zmax, DOMAIN.zmin, iz / (HEAT_H - 1))
+      };
+    }
+
+    function buildHeat(c) {
+      const values = new Float64Array(HEAT_W * HEAT_H);
+      const finiteValues = [];
+      for (let y = 0; y < HEAT_H; y++) {
+        for (let x = 0; x < HEAT_W; x++) {
+          const p = worldFromHeat(x, y);
+          const value = scalarAt(p.x, p.z, c);
+          values[y * HEAT_W + x] = value;
+          if (Number.isFinite(value)) finiteValues.push(value);
+        }
+      }
+      let lo = percentile(finiteValues, 0.04);
+      let hi = percentile(finiteValues, 0.96);
+      if (Math.abs(hi - lo) < 0.001) {
+        lo -= 1;
+        hi += 1;
+      }
+      return { values, lo, hi };
+    }
+
+    function canvasSize() {
+      const rect = refs.canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const width = Math.max(320, Math.round(rect.width * dpr));
+      const height = Math.max(320, Math.round(rect.height * dpr));
+      if (refs.canvas.width !== width || refs.canvas.height !== height) {
+        refs.canvas.width = width;
+        refs.canvas.height = height;
+      }
+      return { width, height, dpr };
+    }
+
+    function plotMap(width, height) {
+      const pad = Math.round(Math.min(width, height) * 0.055);
+      const worldW = DOMAIN.xmax - DOMAIN.xmin;
+      const worldH = DOMAIN.zmax - DOMAIN.zmin;
+      const scale = Math.min((width - 2 * pad) / worldW, (height - 2 * pad) / worldH);
+      const plotW = worldW * scale;
+      const plotH = worldH * scale;
+      const ox = (width - plotW) / 2;
+      const oy = (height - plotH) / 2;
+      return {
+        scale,
+        ox,
+        oy,
+        width: plotW,
+        height: plotH,
+        worldToCanvas(x, z) {
+          return { x: ox + (x - DOMAIN.xmin) * scale, y: oy + (DOMAIN.zmax - z) * scale };
+        },
+        canvasToWorld(x, y) {
+          return { x: DOMAIN.xmin + (x - ox) / scale, z: DOMAIN.zmax - (y - oy) / scale };
+        }
+      };
+    }
+
+    function drawHeat(ctx, plot, heat, c) {
+      const off = document.createElement("canvas");
+      off.width = HEAT_W;
+      off.height = HEAT_H;
+      const offCtx = off.getContext("2d");
+      const image = offCtx.createImageData(HEAT_W, HEAT_H);
+      for (let y = 0; y < HEAT_H; y++) {
+        for (let x = 0; x < HEAT_W; x++) {
+          const p = worldFromHeat(x, y);
+          const raw = heat.values[y * HEAT_W + x];
+          const normalized = (raw - heat.lo) / (heat.hi - heat.lo);
+          const color = valueColor(normalized, 210);
+          const index = (y * HEAT_W + x) * 4;
+          image.data[index] = color[0];
+          image.data[index + 1] = color[1];
+          image.data[index + 2] = color[2];
+          image.data[index + 3] = color[3];
+          if ((p.z >= 0 && c.mode === "electric") || (p.z < 0 && c.mode === "magnetic")) {
+            image.data[index + 3] = 224;
+          }
+        }
+      }
+      offCtx.putImageData(image, 0, 0);
+      ctx.save();
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(off, plot.ox, plot.oy, plot.width, plot.height);
+      ctx.restore();
+    }
+
+    function drawMaterialTint(ctx, plot, c) {
+      const topLeft = plot.worldToCanvas(DOMAIN.xmin, DOMAIN.zmax);
+      const midLeft = plot.worldToCanvas(DOMAIN.xmin, 0);
+      const botLeft = plot.worldToCanvas(DOMAIN.xmin, DOMAIN.zmin);
+      ctx.save();
+      ctx.fillStyle = c.mode === "electric" ? "rgba(29, 100, 216, 0.055)" : "rgba(111, 85, 199, 0.055)";
+      ctx.fillRect(plot.ox, topLeft.y, plot.width, midLeft.y - topLeft.y);
+      ctx.fillStyle = c.mode === "electric" ? "rgba(15, 143, 131, 0.07)" : "rgba(214, 86, 69, 0.055)";
+      ctx.fillRect(plot.ox, midLeft.y, plot.width, botLeft.y - midLeft.y);
+      ctx.strokeStyle = "rgba(38, 48, 71, 0.55)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 7]);
+      ctx.beginPath();
+      ctx.moveTo(plot.ox, midLeft.y);
+      ctx.lineTo(plot.ox + plot.width, midLeft.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+
+    function cellPoint(plot, x, y) {
+      const p = worldFromHeat(x, y);
+      return plot.worldToCanvas(p.x, p.z);
+    }
+
+    function interpolatePoint(plot, x1, y1, v1, x2, y2, v2, level) {
+      const f = Math.abs(v2 - v1) < 0.00001 ? 0.5 : clamp((level - v1) / (v2 - v1), 0, 1);
+      const p1 = worldFromHeat(x1, y1);
+      const p2 = worldFromHeat(x2, y2);
+      return plot.worldToCanvas(lerp(p1.x, p2.x, f), lerp(p1.z, p2.z, f));
+    }
+
+    function drawContours(ctx, plot, heat, c) {
+      const levels = [];
+      const count = c.contourCount;
+      for (let i = 1; i <= count; i++) {
+        levels.push(lerp(heat.lo, heat.hi, i / (count + 1)));
+      }
+      ctx.save();
+      ctx.strokeStyle = c.mode === "electric" ? "rgba(214, 86, 69, 0.65)" : "rgba(111, 85, 199, 0.68)";
+      ctx.lineWidth = 1.15;
+      ctx.globalAlpha = 0.9;
+      for (const level of levels) {
+        ctx.beginPath();
+        for (let y = 0; y < HEAT_H - 1; y++) {
+          for (let x = 0; x < HEAT_W - 1; x++) {
+            const v0 = heat.values[y * HEAT_W + x];
+            const v1 = heat.values[y * HEAT_W + x + 1];
+            const v2 = heat.values[(y + 1) * HEAT_W + x + 1];
+            const v3 = heat.values[(y + 1) * HEAT_W + x];
+            const points = [];
+            if ((v0 < level) !== (v1 < level)) points.push(interpolatePoint(plot, x, y, v0, x + 1, y, v1, level));
+            if ((v1 < level) !== (v2 < level)) points.push(interpolatePoint(plot, x + 1, y, v1, x + 1, y + 1, v2, level));
+            if ((v2 < level) !== (v3 < level)) points.push(interpolatePoint(plot, x + 1, y + 1, v2, x, y + 1, v3, level));
+            if ((v3 < level) !== (v0 < level)) points.push(interpolatePoint(plot, x, y + 1, v3, x, y, v0, level));
+            if (points.length === 2) {
+              ctx.moveTo(points[0].x, points[0].y);
+              ctx.lineTo(points[1].x, points[1].y);
+            } else if (points.length === 4) {
+              ctx.moveTo(points[0].x, points[0].y);
+              ctx.lineTo(points[1].x, points[1].y);
+              ctx.moveTo(points[2].x, points[2].y);
+              ctx.lineTo(points[3].x, points[3].y);
+            }
+          }
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function inDomain(x, z) {
+      return x >= DOMAIN.xmin && x <= DOMAIN.xmax && z >= DOMAIN.zmin && z <= DOMAIN.zmax;
+    }
+
+    function nearSource(x, z, c) {
+      const p = sourcePoints(c);
+      const real = Math.hypot(x - p.real.x, z - p.real.z);
+      const image = Math.hypot(x - p.image.x, z - p.image.z);
+      return real < 0.06 || (c.showImages && image < 0.06);
+    }
+
+    function traceOne(seed, c, direction, maxSteps) {
+      const pts = [];
+      let x = seed.x;
+      let z = seed.z;
+      const step = 0.025;
+      for (let i = 0; i < maxSteps; i++) {
+        if (!inDomain(x, z) || nearSource(x, z, c)) break;
+        pts.push({ x, z });
+        const v = vectorAt(x, z, c);
+        const mag = Math.hypot(v.x, v.z);
+        if (!Number.isFinite(mag) || mag < 0.00002) break;
+        const ux = direction * v.x / mag;
+        const uz = direction * v.z / mag;
+        x += ux * step;
+        z += uz * step;
+      }
+      return pts;
+    }
+
+    function makeFieldLine(seed, c) {
+      if (c.mode === "electric") {
+        return traceOne(seed, c, 1, 720);
+      }
+      const back = traceOne(seed, c, -1, 420).reverse();
+      const front = traceOne(seed, c, 1, 420);
+      return back.concat(front.slice(1));
+    }
+
+    function drawArrowOnPath(ctx, points, color) {
+      if (points.length < 8) return;
+      const index = Math.floor(points.length * 0.58);
+      const a = points[Math.max(0, index - 2)];
+      const b = points[Math.min(points.length - 1, index + 2)];
+      const angle = Math.atan2(b.y - a.y, b.x - a.x);
+      const size = 7;
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.translate(b.x, b.y);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-size, size * 0.45);
+      ctx.lineTo(-size, -size * 0.45);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawVectorArrow(ctx, x, y, angle, length, color, alpha, lineWidth) {
+      const half = length * 0.45;
+      const tailX = x - Math.cos(angle) * half;
+      const tailY = y - Math.sin(angle) * half;
+      const headX = x + Math.cos(angle) * half;
+      const headY = y + Math.sin(angle) * half;
+      const head = Math.max(6, length * 0.32);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = lineWidth;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(tailX, tailY);
+      ctx.lineTo(headX, headY);
+      ctx.stroke();
+      ctx.translate(headX, headY);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-head, head * 0.44);
+      ctx.lineTo(-head, -head * 0.44);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawSampledVectorField(ctx, plot, c, options) {
+      const targetCount = Math.max(12, options.targetCount);
+      const aspect = (DOMAIN.xmax - DOMAIN.xmin) / (DOMAIN.zmax - DOMAIN.zmin);
+      const cols = Math.max(4, Math.ceil(Math.sqrt(targetCount * aspect)));
+      const rows = Math.max(4, Math.ceil(targetCount / cols));
+      const samples = [];
+      const magnitudes = [];
+      const p = sourcePoints(c);
+      for (let row = 0; row < rows; row++) {
+        const z = lerp(DOMAIN.zmax - 0.22, DOMAIN.zmin + 0.22, row / (rows - 1));
+        for (let col = 0; col < cols; col++) {
+          const x = lerp(DOMAIN.xmin + 0.25, DOMAIN.xmax - 0.25, col / (cols - 1));
+          if (Math.hypot(x - p.real.x, z - p.real.z) < options.skipRadius) continue;
+          const v = options.vector(x, z, c);
+          const mag = Math.hypot(v.x, v.z);
+          if (!Number.isFinite(mag) || mag < 0.00008) continue;
+          const pixel = plot.worldToCanvas(x, z);
+          samples.push({ pixel, v, mag });
+          magnitudes.push(mag);
+        }
+      }
+
+      const ref = Math.max(0.0001, percentile(magnitudes, 0.86));
+      const cell = Math.min(plot.width / cols, plot.height / rows);
+      for (const sample of samples) {
+        const strength = clamp(sample.mag / ref, 0, 1.55);
+        const length = clamp(cell * (0.62 + 0.5 * Math.sqrt(strength / 1.55)), 12, options.maxLength);
+        const alpha = options.alphaBase + options.alphaRange * clamp(strength, 0, 1);
+        const angle = Math.atan2(-sample.v.z, sample.v.x);
+        drawVectorArrow(ctx, sample.pixel.x, sample.pixel.y, angle, length, options.color, alpha, options.lineWidth);
+      }
+    }
+
+    function drawMagneticFieldArrows(ctx, plot, c) {
+      drawSampledVectorField(ctx, plot, c, {
+        targetCount: c.lineCount,
+        vector: magneticVector,
+        skipRadius: 0.22,
+        color: "rgb(15, 143, 131)",
+        alphaBase: 0.52,
+        alphaRange: 0.42,
+        maxLength: 42,
+        lineWidth: 2.35
+      });
+    }
+
+    function drawFieldLines(ctx, plot, c) {
+      if (c.mode === "magnetic") {
+        drawMagneticFieldArrows(ctx, plot, c);
+        return;
+      }
+      const p = sourcePoints(c);
+      const seeds = [];
+      const radius = 0.14;
+      for (let i = 0; i < c.lineCount; i++) {
+        const angle = (i / c.lineCount) * Math.PI * 2;
+        seeds.push({
+          x: p.real.x + radius * Math.cos(angle),
+          z: p.real.z + radius * Math.sin(angle)
+        });
+      }
+      if (c.mode === "magnetic" && Math.abs(coefficients(c).image) > 0.08) {
+        const extra = Math.max(8, Math.round(c.lineCount / 3));
+        for (let i = 0; i < extra; i++) {
+          const angle = (i / extra) * Math.PI * 2;
+          seeds.push({
+            x: p.image.x + radius * Math.cos(angle),
+            z: p.image.z + radius * Math.sin(angle)
+          });
+        }
+      }
+
+      ctx.save();
+      const color = c.mode === "electric" ? "rgba(29, 100, 216, 0.82)" : "rgba(15, 143, 131, 0.82)";
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.7;
+      ctx.lineCap = "round";
+      for (const seed of seeds) {
+        const line = makeFieldLine(seed, c);
+        if (line.length < 6) continue;
+        const pixels = line.map((pt) => plot.worldToCanvas(pt.x, pt.z));
+        ctx.beginPath();
+        ctx.moveTo(pixels[0].x, pixels[0].y);
+        for (let i = 1; i < pixels.length; i++) {
+          ctx.lineTo(pixels[i].x, pixels[i].y);
+        }
+        ctx.stroke();
+        drawArrowOnPath(ctx, pixels, color);
+      }
+      ctx.restore();
+    }
+
+    function signColor(value) {
+      if (Math.abs(value) < 0.015) return "#6f7788";
+      return value >= 0 ? "#b42d82" : "#0c8891";
+    }
+
+    function formatSigned(value) {
+      const fixed = Math.abs(value) < 0.0005 ? 0 : value;
+      return (fixed >= 0 ? "+" : "") + fixed.toFixed(3);
+    }
+
+    function drawLabel(ctx, text, x, y, align) {
+      ctx.save();
+      ctx.font = "600 12px Inter, Segoe UI, sans-serif";
+      ctx.textAlign = align || "center";
+      ctx.textBaseline = "middle";
+      const metrics = ctx.measureText(text);
+      const padX = 7;
+      const padY = 5;
+      const width = metrics.width + padX * 2;
+      const height = 22;
+      const left = align === "left" ? x - padX : align === "right" ? x - width + padX : x - width / 2;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.86)";
+      ctx.strokeStyle = "rgba(96, 112, 134, 0.28)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(left, y - height / 2, width, height, 7);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#263047";
+      ctx.fillText(text, x, y + 0.5);
+      ctx.restore();
+    }
+
+    function drawSources(ctx, plot, c) {
+      const k = coefficients(c);
+      const p = sourcePoints(c);
+      const real = plot.worldToCanvas(p.real.x, p.real.z);
+      const image = plot.worldToCanvas(p.image.x, p.image.z);
+      ctx.save();
+      ctx.lineWidth = 3;
+      ctx.fillStyle = signColor(1);
+      ctx.strokeStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(real.x, real.y, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "800 13px Inter, Segoe UI, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(c.mode === "electric" ? "+" : "I", real.x, real.y + 0.5);
+      drawLabel(ctx, c.mode === "electric" ? t("sourceLabelElectric") : t("sourceLabelMagnetic"), real.x, real.y - 25);
+
+      if (c.showImages) {
+        ctx.setLineDash([7, 6]);
+        ctx.strokeStyle = "rgba(38, 48, 71, 0.34)";
+        ctx.beginPath();
+        ctx.moveTo(real.x, real.y);
+        ctx.lineTo(image.x, image.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = signColor(k.image);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.92)";
+        ctx.lineWidth = 3;
+        ctx.globalAlpha = 0.86;
+        ctx.beginPath();
+        ctx.arc(image.x, image.y, 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "800 12px Inter, Segoe UI, sans-serif";
+        ctx.fillText(k.image >= 0 ? "+" : "-", image.x, image.y + 0.5);
+        const label = (c.mode === "electric" ? t("imageLabelElectric") : t("imageLabelMagnetic")) + " " + formatSigned(k.image);
+        drawLabel(ctx, label, image.x, image.y + 27);
+      }
+
+      const mid = plot.worldToCanvas(DOMAIN.xmin + 0.26, 0);
+      const upperLabel = c.mode === "electric" ? t("upperMaterialElectric") : t("upperMaterialMagnetic");
+      const lowerLabel = c.mode === "electric" ? t("lowerMaterialElectric") : t("lowerMaterialMagnetic");
+      drawLabel(ctx, upperLabel, mid.x, mid.y - 28, "left");
+      drawLabel(ctx, lowerLabel, mid.x, mid.y + 28, "left");
+
+      const right = plot.worldToCanvas(DOMAIN.xmax - 0.3, -0.55);
+      const transmittedText = c.mode === "electric" ? t("transmittedElectric") : t("transmittedMagnetic");
+      drawLabel(ctx, transmittedText + " = " + k.transmitted.toFixed(3), right.x, right.y, "right");
+      ctx.restore();
+    }
+
+    function drawAxesAndFrame(ctx, plot) {
+      ctx.save();
+      ctx.strokeStyle = "rgba(38, 48, 71, 0.18)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(plot.ox, plot.oy, plot.width, plot.height);
+      const zero = plot.worldToCanvas(0, 0);
+      ctx.strokeStyle = "rgba(38, 48, 71, 0.18)";
+      ctx.beginPath();
+      ctx.moveTo(zero.x, plot.oy);
+      ctx.lineTo(zero.x, plot.oy + plot.height);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(38, 48, 71, 0.72)";
+      ctx.font = "600 12px Inter, Segoe UI, sans-serif";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "bottom";
+      ctx.fillText("z = 0", plot.ox + plot.width - 10, zero.y - 7);
+      ctx.restore();
+    }
+
+    function render() {
+      const c = controls();
+      const size = canvasSize();
+      const ctx = refs.canvas.getContext("2d");
+      const plot = plotMap(size.width, size.height);
+      const key = JSON.stringify({
+        mode: c.mode,
+        ratio: c.ratio.toFixed(4),
+        height: c.height.toFixed(3)
+      });
+      if (c.mode === "electric" && (!state.heat || state.lastKey !== key)) {
+        state.heat = buildHeat(c);
+        state.lastKey = key;
+      }
+
+      ctx.clearRect(0, 0, size.width, size.height);
+      ctx.fillStyle = "#f8fafc";
+      ctx.fillRect(0, 0, size.width, size.height);
+      drawMaterialTint(ctx, plot, c);
+      if (c.mode === "electric" && c.showScalar) drawHeat(ctx, plot, state.heat, c);
+      drawMaterialTint(ctx, plot, c);
+      if (c.mode === "electric" && c.showContours) drawContours(ctx, plot, state.heat, c);
+      if (c.showFields) drawFieldLines(ctx, plot, c);
+      drawAxesAndFrame(ctx, plot);
+      drawSources(ctx, plot, c);
+    }
+
+    function configureDensityControl(electric) {
+      const min = electric ? 12 : 40;
+      const max = electric ? 56 : 1400;
+      refs.lineCount.min = String(min);
+      refs.lineCount.max = String(max);
+      refs.lineCount.step = electric ? "2" : "20";
+      const value = clamp(Number(refs.lineCount.value), min, max);
+      if (value !== Number(refs.lineCount.value)) {
+        refs.lineCount.value = String(value);
+      }
+    }
+
+    function updateFormula(c) {
+      if (c.mode === "electric") {
+        refs.formulaBox.innerHTML =
+          "alpha_E = (epsilon1 - epsilon2) / (epsilon1 + epsilon2)<br>" +
+          "lambda_img = alpha_E lambda<br>" +
+          "lambda_t = 2 epsilon2 lambda / (epsilon1 + epsilon2)<br>" +
+          "Phi1 = -(lambda ln r1 + lambda_img ln r2) / (2 pi epsilon1)";
+      } else {
+        refs.formulaBox.innerHTML =
+          "alpha_M = (mu2 - mu1) / (mu1 + mu2)<br>" +
+          "I_img = alpha_M I<br>" +
+          "I_t = 2 mu1 I / (mu1 + mu2)<br>" +
+          "A1_y = -mu1 (I ln r1 + I_img ln r2) / (2 pi)";
+      }
+    }
+
+    function updateReadouts() {
+      const electric = activeMode() === "electric";
+      configureDensityControl(electric);
+      const c = controls();
+      const k = coefficients(c);
+      const ratioText = c.ratio >= 10 ? c.ratio.toFixed(1) : c.ratio.toFixed(2);
+      refs.contourControl.classList.toggle("mode-hidden", !electric);
+      refs.scalarToggle.classList.toggle("mode-hidden", !electric);
+      refs.contourToggle.classList.toggle("mode-hidden", !electric);
+      refs.scalarLegendItem.classList.toggle("mode-hidden", !electric);
+      refs.contourLegendItem.classList.toggle("mode-hidden", !electric);
+      refs.fieldCountLabel.textContent = electric ? t("fieldLines") : t("fieldVectors");
+      refs.ratioLabel.textContent = electric ? t("epsilonRatio") : t("muRatio");
+      refs.ratioValue.textContent = ratioText;
+      refs.heightValue.textContent = c.height.toFixed(2) + " a";
+      refs.linesValue.textContent = String(c.lineCount);
+      refs.contoursValue.textContent = String(c.contourCount);
+      refs.scalarLegend.textContent = t("scalarElectric");
+      refs.contourLegend.textContent = t("contourElectric");
+      refs.fieldLegend.textContent = electric ? t("fieldElectric") : t("fieldMagnetic");
+      refs.fieldLegendSwatch.style.background = electric ? "var(--blue)" : "var(--teal)";
+      refs.fieldToggleText.textContent = electric ? t("showElectricField") : t("showMagneticB");
+      refs.modeReadout.textContent = electric ? t("electricReadout") : t("magneticReadout");
+      refs.materialReadout.textContent = (electric ? t("epsilonRatio") : t("muRatio")) + " = " + ratioText;
+      refs.imageReadout.textContent = (electric ? "lambda_img / lambda = " : "I_img / I = ") + formatSigned(k.image);
+      refs.transReadout.textContent = (electric ? "lambda_t / lambda = " : "I_t / I = ") + k.transmitted.toFixed(3);
+      refs.boundaryReadout.textContent = electric ? t("electricBoundary") : t("magneticBoundary");
+      refs.status.textContent = (electric ? t("statusElectric") : t("statusMagnetic")) + "; " + refs.materialReadout.textContent;
+      updateFormula(c);
+      render();
+    }
+
+    function resetDefaults() {
+      refs.modeInputs.forEach((input) => {
+        input.checked = input.value === "electric";
+      });
+      refs.ratio.value = "0.48";
+      refs.height.value = "0.9";
+      refs.lineCount.value = "32";
+      refs.contourCount.value = "15";
+      refs.showScalar.checked = true;
+      refs.showContours.checked = true;
+      refs.showFields.checked = true;
+      refs.showImages.checked = true;
+      state.heat = null;
+      updateReadouts();
+    }
+
+    refs.modeInputs.forEach((input) => input.addEventListener("change", () => {
+      const electric = activeMode() === "electric";
+      const currentCount = Number(refs.lineCount.value);
+      if (electric && currentCount > 56) {
+        refs.lineCount.value = "32";
+      } else if (!electric && currentCount < 120) {
+        refs.lineCount.value = "300";
+      }
+      state.heat = null;
+      updateReadouts();
+    }));
+
+    [refs.ratio, refs.height, refs.lineCount, refs.contourCount].forEach((input) => {
+      input.addEventListener("input", () => {
+        state.heat = null;
+        updateReadouts();
+      });
+    });
+
+    [refs.showScalar, refs.showContours, refs.showFields, refs.showImages].forEach((input) => {
+      input.addEventListener("change", updateReadouts);
+    });
+
+    refs.equalMaterials.addEventListener("click", () => {
+      refs.ratio.value = "0";
+      state.heat = null;
+      updateReadouts();
+    });
+
+    refs.defaults.addEventListener("click", resetDefaults);
+
+    window.addEventListener("resize", () => {
+      render();
+    });
+
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function roundRect(x, y, w, h, r) {
+        const radius = Math.min(r, w / 2, h / 2);
+        this.moveTo(x + radius, y);
+        this.arcTo(x + w, y, x + w, y + h, radius);
+        this.arcTo(x + w, y + h, x, y + h, radius);
+        this.arcTo(x, y + h, x, y, radius);
+        this.arcTo(x, y, x + w, y, radius);
+        return this;
+      };
+    }
+
+    applyLanguage();
+    updateReadouts();
+  </script>
+</body>
+</html>

@@ -242,6 +242,10 @@
       --accent: var(--blue);
     }
 
+    .pulse {
+      --accent: var(--violet);
+    }
+
     .line {
       --accent: var(--teal);
     }
@@ -260,6 +264,10 @@
 
     .images {
       --accent: var(--green);
+    }
+
+    .interface {
+      --accent: var(--blue);
     }
 
     .fields {
@@ -329,7 +337,7 @@
         <h1>EM Fields and Waves Demonstrations</h1>
       </div>
       <div class="meta" aria-label="Portal controls">
-        <span class="pill">6 demonstrations</span>
+        <span class="pill">8 demonstrations</span>
         <a class="language-link" href="portal_he.html" lang="he" dir="rtl">עברית</a>
       </div>
     </header>
@@ -357,6 +365,29 @@
             <h3>Voltage Standing Wave Ratio</h3>
             <p>Adjust the complex reflection coefficient and watch sixteen faded snapshots of the instantaneous voltage along a transmission line.</p>
             <span class="equation">VSWR = (1 + |&Gamma;|) / (1 - |&Gamma;|)</span>
+            <span class="open-label">Open demo &rarr;</span>
+          </span>
+          </a>
+
+          <a class="demo-card pulse" href="dispersive_pulse_demo.html">
+          <span class="thumb" aria-hidden="true">
+            <svg viewBox="0 0 360 250" focusable="false">
+              <rect width="360" height="250" fill="#f8fbff"></rect>
+              <path d="M32 124 H330" stroke="#d7e1ec" stroke-width="2"></path>
+              <path d="M38 126 C58 82 88 82 108 126 S158 170 178 126 S228 82 248 126 S298 170 326 126" fill="none" stroke="#1d64d8" stroke-width="5" stroke-linecap="round"></path>
+              <path d="M34 126 C88 72 146 72 202 126 S292 180 330 126" fill="none" stroke="#0f8f83" stroke-width="5" stroke-linecap="round" opacity="0.78"></path>
+              <path d="M38 126 C92 90 142 90 192 126 S276 162 326 126" fill="none" stroke="#8794a8" stroke-width="4" stroke-linecap="round" stroke-dasharray="9 8" opacity="0.78"></path>
+              <path d="M44 198 C105 194 148 176 176 122 S230 54 318 56" fill="none" stroke="#d65645" stroke-width="5" stroke-linecap="round"></path>
+              <path d="M206 47 V207" stroke="#b77900" stroke-width="4" stroke-dasharray="8 8" opacity="0.82"></path>
+              <circle cx="206" cy="122" r="8" fill="#ffffff" stroke="#b77900" stroke-width="4"></circle>
+              <circle cx="104" cy="126" r="8" fill="#ffffff" stroke="#1d64d8" stroke-width="4"></circle>
+            </svg>
+          </span>
+          <span class="card-body">
+            <span class="kicker">Dispersive media</span>
+            <h3>Dispersive Pulse Propagation</h3>
+            <p>Launch a multi-frequency pulse through a Lorentzian dispersive medium and compare its reshaping with a no-dispersion reference.</p>
+            <span class="equation">n(f) = n<sub>0</sub> + S L(f; f<sub>r</sub>, &Gamma;)</span>
             <span class="open-label">Open demo &rarr;</span>
           </span>
           </a>
@@ -478,6 +509,34 @@
             <h3>Conducting Sphere Images</h3>
             <p>Move a point charge near a conducting sphere, set the sphere potential, and compare the real surface charge with its image-charge construction.</p>
             <span class="equation">q' = -(R/d)q, x' = R<sup>2</sup>/d</span>
+            <span class="open-label">Open demo &rarr;</span>
+          </span>
+          </a>
+
+          <a class="demo-card interface" href="line_interface_images.html">
+          <span class="thumb" aria-hidden="true">
+            <svg viewBox="0 0 360 250" focusable="false">
+              <rect width="360" height="250" fill="#f8fbff"></rect>
+              <rect x="0" y="0" width="360" height="125" fill="#eaf1ff"></rect>
+              <rect x="0" y="125" width="360" height="125" fill="#e8f7f4"></rect>
+              <path d="M24 125 H336" stroke="#263047" stroke-width="4" stroke-dasharray="10 8" opacity="0.55"></path>
+              <path d="M58 55 C118 80 145 104 180 64 S250 38 315 66" fill="none" stroke="#1d64d8" stroke-width="5" stroke-linecap="round" opacity="0.82"></path>
+              <path d="M50 96 C118 112 146 118 180 88 S248 78 318 98" fill="none" stroke="#0f8f83" stroke-width="5" stroke-linecap="round" opacity="0.78"></path>
+              <path d="M50 155 C118 136 145 132 180 162 S248 176 318 154" fill="none" stroke="#d65645" stroke-width="5" stroke-linecap="round" opacity="0.76"></path>
+              <path d="M58 194 C118 170 145 148 180 188 S250 214 315 186" fill="none" stroke="#1d64d8" stroke-width="5" stroke-linecap="round" opacity="0.7"></path>
+              <path d="M180 74 V176" stroke="#7d8999" stroke-width="3" stroke-dasharray="7 7"></path>
+              <circle cx="180" cy="74" r="15" fill="#b42d82" stroke="#ffffff" stroke-width="5"></circle>
+              <path d="M175 74 H185 M180 69 V79" stroke="#ffffff" stroke-width="4" stroke-linecap="round"></path>
+              <circle cx="180" cy="176" r="13" fill="#0c8891" stroke="#ffffff" stroke-width="5" opacity="0.9"></circle>
+              <path d="M174 176 H186" stroke="#ffffff" stroke-width="4" stroke-linecap="round"></path>
+              <path d="M210 74 C242 82 260 103 265 125 C260 147 242 168 210 176" fill="none" stroke="#b77900" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 7"></path>
+            </svg>
+          </span>
+          <span class="card-body">
+            <span class="kicker">Planar images</span>
+            <h3>Line Source at a Material Interface</h3>
+            <p>Vary the ratio between two half-spaces and compare the electric image-charge solution with the dual magnetic line-current construction.</p>
+            <span class="equation">&alpha;<sub>E</sub> = (&epsilon;<sub>1</sub>-&epsilon;<sub>2</sub>) / (&epsilon;<sub>1</sub>+&epsilon;<sub>2</sub>)</span>
             <span class="open-label">Open demo &rarr;</span>
           </span>
           </a>

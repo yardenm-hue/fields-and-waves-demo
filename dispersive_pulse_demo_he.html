@@ -1,0 +1,1137 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>הדגמת התפשטות פולס בתווך דיספרסיבי</title>
+  <script data-goatcounter="https://emftau.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f9fc;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #617089;
+      --line: #d8e0ea;
+      --blue: #1d64d8;
+      --teal: #0f8f83;
+      --coral: #d65645;
+      --amber: #b77900;
+      --violet: #6f55c7;
+      --shadow: 0 18px 45px rgba(29, 44, 73, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      direction: rtl;
+      text-align: right;
+      background:
+        linear-gradient(180deg, rgba(248, 250, 252, 0.99), rgba(236, 242, 249, 0.98)),
+        linear-gradient(135deg, rgba(29, 100, 216, 0.07), rgba(15, 143, 131, 0.05) 45%, rgba(214, 86, 69, 0.055));
+      color: var(--ink);
+    }
+
+    main {
+      width: min(1260px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 26px 0 34px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: end;
+      padding: 4px 0 18px;
+    }
+
+    header > div,
+    .plot-title {
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.85rem, 3.5vw, 3.05rem);
+      line-height: 1.03;
+      letter-spacing: 0;
+      overflow-wrap: break-word;
+    }
+
+    .subtitle {
+      max-width: 810px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.55;
+      overflow-wrap: break-word;
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .portal-link,
+    .language-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      margin-top: 14px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 8px 24px rgba(29, 44, 73, 0.08);
+      color: var(--blue);
+      font-size: 0.93rem;
+      font-weight: 700;
+      line-height: 1.2;
+      text-decoration: none;
+    }
+
+    .portal-link:hover,
+    .language-link:hover {
+      border-color: rgba(29, 100, 216, 0.45);
+      background: #ffffff;
+    }
+
+    .formula {
+      direction: ltr;
+      text-align: left;
+      unicode-bidi: isolate;
+      max-width: 500px;
+      padding: 13px 15px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: 0 8px 24px rgba(29, 44, 73, 0.08);
+      color: #24324a;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.86rem;
+      line-height: 1.5;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 350px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .plot-panel,
+    .controls {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.93);
+      box-shadow: var(--shadow);
+    }
+
+    .plot-panel {
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .plot-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .plot-title h2,
+    .controls h2,
+    .spectrum-heading h2 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+    .plot-title p,
+    .spectrum-heading p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px 14px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .swatch {
+      width: 22px;
+      height: 3px;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+    .swatch.envelope {
+      background: var(--teal);
+    }
+
+    .swatch.reference {
+      background: repeating-linear-gradient(90deg, #8794a8 0 5px, transparent 5px 9px);
+    }
+
+    .swatch.dispersion {
+      background: var(--coral);
+    }
+
+    .propagation-wrap {
+      position: relative;
+      height: clamp(340px, 52vh, 560px);
+      min-height: 330px;
+    }
+
+    .spectrum-panel {
+      border-top: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+
+    .spectrum-heading {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 18px 8px;
+    }
+
+    .spectrum-wrap {
+      height: 230px;
+      min-height: 210px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .readouts {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+      background: #ffffff;
+    }
+
+    .readout {
+      min-width: 0;
+      padding: 14px 16px;
+      border-inline-end: 1px solid var(--line);
+    }
+
+    .readout:last-child {
+      border-inline-end: 0;
+    }
+
+    .readout strong {
+      display: block;
+      color: var(--ink);
+      font-size: 1.1rem;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .readout span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.35;
+    }
+
+    .controls {
+      position: sticky;
+      top: 16px;
+      min-width: 0;
+      padding: 16px;
+    }
+
+    .control-group {
+      padding: 15px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .control-group:first-of-type {
+      margin-top: 12px;
+    }
+
+    .control-group h3 {
+      margin: 0 0 12px;
+      color: #24324a;
+      font-size: 0.92rem;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .control {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px 12px;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .control:first-of-type {
+      margin-top: 0;
+    }
+
+    label {
+      min-width: 0;
+      color: #24324a;
+      font-size: 0.9rem;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    output {
+      justify-self: end;
+      color: var(--muted);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.82rem;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      grid-column: 1 / -1;
+      width: 100%;
+      accent-color: var(--blue);
+    }
+
+    .check-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      color: #24324a;
+      font-size: 0.9rem;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      margin: 0;
+      accent-color: var(--blue);
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--blue);
+      font: inherit;
+      font-size: 0.92rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(29, 44, 73, 0.07);
+    }
+
+    button:hover {
+      border-color: rgba(29, 100, 216, 0.48);
+      background: #f8fbff;
+    }
+
+    .primary-button {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #ffffff;
+    }
+
+    .primary-button:hover {
+      background: #1959c5;
+    }
+
+    .portal-link:focus-visible,
+    .language-link:focus-visible,
+    button:focus-visible,
+    input:focus-visible {
+      outline: 3px solid rgba(29, 100, 216, 0.34);
+      outline-offset: 3px;
+    }
+
+    .note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.48;
+    }
+
+    @media (max-width: 1020px) {
+      header,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .formula {
+        justify-self: start;
+      }
+
+      .controls {
+        position: static;
+      }
+    }
+
+    @media (max-width: 720px) {
+      main {
+        width: min(100% - 22px, 1260px);
+        padding-top: 18px;
+      }
+
+      .plot-toolbar,
+      .spectrum-heading {
+        display: block;
+      }
+
+      .legend {
+        justify-content: flex-start;
+        margin-top: 10px;
+      }
+
+      .readouts {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .readout:nth-child(2) {
+        border-inline-end: 0;
+      }
+
+      .readout:nth-child(-n + 2) {
+        border-bottom: 1px solid var(--line);
+      }
+    }
+
+    @media (max-width: 460px) {
+      .readouts,
+      .button-row {
+        grid-template-columns: 1fr;
+      }
+
+      .readout {
+        border-inline-end: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .readout:last-child {
+        border-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>התפשטות פולס בתווך דיספרסיבי</h1>
+        <p class="subtitle">פולס הבנוי מרכיבי תדר סמוכים נע בתווך בעל דיספרסיה לורנציאנית. הצטברות פאזה שונה לאורך הספקטרום משנה את צורת המעטפת בזמן ההתפשטות משמאל לימין.</p>
+        <div class="header-actions">
+          <a class="portal-link" href="portal_he.html">חזרה לפורטל</a>
+          <a class="language-link" href="dispersive_pulse_demo.html" lang="en" dir="ltr">English</a>
+        </div>
+      </div>
+      <div class="formula" aria-label="מודל הדיספרסיה">
+        n(f) = n0 + S * 2 Gamma (fr - f) / ((f - fr)^2 + Gamma^2)<br>
+        beta(f) = 2 pi f n(f)
+      </div>
+    </header>
+
+    <section class="layout">
+      <section class="plot-panel" aria-label="התפשטות הפולס והספקטרום">
+        <div class="plot-toolbar">
+          <div class="plot-title">
+            <h2>הפולס בתוך התווך</h2>
+            <p>הגל הרציף הוא השדה החשמלי; המעטפת עוקבת אחרי צורת הפולס.</p>
+          </div>
+          <div class="legend" aria-label="מקרא הגרף">
+            <span><i class="swatch"></i>שדה</span>
+            <span><i class="swatch envelope"></i>מעטפת</span>
+            <span><i class="swatch reference"></i>ייחוס ללא דיספרסיה</span>
+          </div>
+        </div>
+        <div class="propagation-wrap">
+          <canvas id="pulseCanvas" aria-label="גרף מונפש של התפשטות הפולס"></canvas>
+        </div>
+        <div class="readouts" aria-label="ערכים מספריים נוכחיים">
+          <div class="readout">
+            <strong id="indexReadout">1.050</strong>
+            <span>מקדם שבירה בתדר המרכזי</span>
+          </div>
+          <div class="readout">
+            <strong id="groupReadout">1.05</strong>
+            <span>מקדם חבורה בתדר המרכזי</span>
+          </div>
+          <div class="readout">
+            <strong id="delayReadout">0.00</strong>
+            <span>פריסת השהיה בספקטרום</span>
+          </div>
+          <div class="readout">
+            <strong id="countReadout">17</strong>
+            <span>רכיבי תדר</span>
+          </div>
+        </div>
+        <div class="spectrum-panel">
+          <div class="spectrum-heading">
+            <div>
+              <h2>ספקטרום ודיספרסיה</h2>
+              <p>הקווים הכחולים הם רכיבי הפולס; העקומה האדומה היא מקדם השבירה הלורנציאני.</p>
+            </div>
+            <div class="legend" aria-label="מקרא הספקטרום">
+              <span><i class="swatch"></i>ספקטרום</span>
+              <span><i class="swatch dispersion"></i>n(f)</span>
+            </div>
+          </div>
+          <div class="spectrum-wrap">
+            <canvas id="spectrumCanvas" aria-label="גרף הספקטרום ודיספרסיה לורנציאנית"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <aside class="controls" aria-label="בקרות ההדגמה">
+        <h2>בקרות</h2>
+
+        <div class="control-group">
+          <h3>הפולס</h3>
+          <div class="control">
+            <label for="centerFrequency">תדר מרכזי</label>
+            <output id="centerFrequencyValue" for="centerFrequency">8.0</output>
+            <input id="centerFrequency" type="range" min="4" max="16" step="0.1" value="8">
+          </div>
+          <div class="control">
+            <label for="bandwidth">רוחב ספקטרלי</label>
+            <output id="bandwidthValue" for="bandwidth">2.0</output>
+            <input id="bandwidth" type="range" min="0.4" max="4" step="0.1" value="2">
+          </div>
+          <div class="control">
+            <label for="componentCount">רכיבים</label>
+            <output id="componentCountValue" for="componentCount">17</output>
+            <input id="componentCount" type="range" min="5" max="31" step="2" value="17">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <h3>תווך לורנציאני</h3>
+          <div class="control">
+            <label for="resonanceFrequency">תדר תהודה</label>
+            <output id="resonanceFrequencyValue" for="resonanceFrequency">9.5</output>
+            <input id="resonanceFrequency" type="range" min="4" max="16" step="0.1" value="9.5">
+          </div>
+          <div class="control">
+            <label for="resonanceWidth">רוחב לורנציאני</label>
+            <output id="resonanceWidthValue" for="resonanceWidth">0.80</output>
+            <input id="resonanceWidth" type="range" min="0.2" max="3" step="0.05" value="0.8">
+          </div>
+          <div class="control">
+            <label for="dispersionStrength">עוצמת הדיספרסיה</label>
+            <output id="dispersionStrengthValue" for="dispersionStrength">0.32</output>
+            <input id="dispersionStrength" type="range" min="0" max="0.75" step="0.01" value="0.32">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <h3>אנימציה</h3>
+          <div class="control">
+            <label for="animationSpeed">מהירות</label>
+            <output id="animationSpeedValue" for="animationSpeed">0.85x</output>
+            <input id="animationSpeed" type="range" min="0.2" max="2" step="0.05" value="0.85">
+          </div>
+          <label class="check-control" for="showEnvelope">
+            <input id="showEnvelope" type="checkbox" checked>
+            הצגת מעטפת
+          </label>
+          <label class="check-control" for="showReference">
+            <input id="showReference" type="checkbox" checked>
+            הצגת ייחוס ללא דיספרסיה
+          </label>
+          <div class="button-row">
+            <button id="playPause" type="button" class="primary-button">עצירה</button>
+            <button id="reset" type="button">איפוס</button>
+          </div>
+        </div>
+
+        <p class="note">המודל משתמש בחלק הממשי של קו לורנציאני מנורמל, כך ששינוי צורת הפולס הנראה נובע מדיספרסיית פאזה.</p>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const baseIndex = 1.05;
+      const launchPosition = 0.14;
+      const propagationLength = 10;
+      const dispersionRiseTime = 0.95;
+      const pulseCanvas = document.getElementById("pulseCanvas");
+      const spectrumCanvas = document.getElementById("spectrumCanvas");
+      const pulseCtx = pulseCanvas.getContext("2d");
+      const spectrumCtx = spectrumCanvas.getContext("2d");
+
+      const controls = {
+        centerFrequency: document.getElementById("centerFrequency"),
+        bandwidth: document.getElementById("bandwidth"),
+        componentCount: document.getElementById("componentCount"),
+        resonanceFrequency: document.getElementById("resonanceFrequency"),
+        resonanceWidth: document.getElementById("resonanceWidth"),
+        dispersionStrength: document.getElementById("dispersionStrength"),
+        animationSpeed: document.getElementById("animationSpeed"),
+        showEnvelope: document.getElementById("showEnvelope"),
+        showReference: document.getElementById("showReference")
+      };
+
+      const values = {
+        centerFrequency: document.getElementById("centerFrequencyValue"),
+        bandwidth: document.getElementById("bandwidthValue"),
+        componentCount: document.getElementById("componentCountValue"),
+        resonanceFrequency: document.getElementById("resonanceFrequencyValue"),
+        resonanceWidth: document.getElementById("resonanceWidthValue"),
+        dispersionStrength: document.getElementById("dispersionStrengthValue"),
+        animationSpeed: document.getElementById("animationSpeedValue")
+      };
+
+      const readouts = {
+        index: document.getElementById("indexReadout"),
+        group: document.getElementById("groupReadout"),
+        delay: document.getElementById("delayReadout"),
+        count: document.getElementById("countReadout")
+      };
+
+      const buttons = {
+        playPause: document.getElementById("playPause"),
+        reset: document.getElementById("reset")
+      };
+
+      const state = {
+        playing: true,
+        time: -0.32,
+        lastFrame: 0
+      };
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+      }
+
+      function smoothstep(edge0, edge1, value) {
+        const t = clamp((value - edge0) / (edge1 - edge0), 0, 1);
+        return t * t * (3 - 2 * t);
+      }
+
+      function getSettings() {
+        return {
+          centerFrequency: Number(controls.centerFrequency.value),
+          bandwidth: Number(controls.bandwidth.value),
+          componentCount: Number(controls.componentCount.value),
+          resonanceFrequency: Number(controls.resonanceFrequency.value),
+          resonanceWidth: Number(controls.resonanceWidth.value),
+          dispersionStrength: Number(controls.dispersionStrength.value),
+          animationSpeed: Number(controls.animationSpeed.value),
+          showEnvelope: controls.showEnvelope.checked,
+          showReference: controls.showReference.checked
+        };
+      }
+
+      function dispersionIndex(frequency, settings) {
+        const gamma = settings.resonanceWidth;
+        const detuning = settings.resonanceFrequency - frequency;
+        const normalizedLorentzian = (2 * gamma * detuning) / (detuning * detuning + gamma * gamma);
+        return baseIndex + settings.dispersionStrength * normalizedLorentzian;
+      }
+
+      function dispersionSlope(frequency, settings) {
+        const gamma = settings.resonanceWidth;
+        const detuning = settings.resonanceFrequency - frequency;
+        const denominator = detuning * detuning + gamma * gamma;
+        return settings.dispersionStrength * 2 * gamma * (detuning * detuning - gamma * gamma) / (denominator * denominator);
+      }
+
+      function groupIndex(frequency, settings) {
+        return dispersionIndex(frequency, settings) + frequency * dispersionSlope(frequency, settings);
+      }
+
+      function makeComponents(settings) {
+        const count = settings.componentCount;
+        const half = (count - 1) / 2;
+        const spacing = settings.bandwidth / Math.max(1, count - 1);
+        const sigma = settings.bandwidth / 3.15;
+        const components = [];
+        let weightSum = 0;
+
+        for (let i = -half; i <= half; i += 1) {
+          const frequency = Math.max(0.2, settings.centerFrequency + i * spacing);
+          const offset = frequency - settings.centerFrequency;
+          const weight = Math.exp(-0.5 * (offset / sigma) * (offset / sigma));
+          const index = dispersionIndex(frequency, settings);
+          const group = groupIndex(frequency, settings);
+          components.push({ frequency, weight, index, group });
+          weightSum += weight;
+        }
+
+        return { components, weightSum };
+      }
+
+      function resizeCanvas(canvas, ctx) {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const width = Math.max(1, Math.round(rect.width * dpr));
+        const height = Math.max(1, Math.round(rect.height * dpr));
+        if (canvas.width !== width || canvas.height !== height) {
+          canvas.width = width;
+          canvas.height = height;
+        }
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function clearCanvas(ctx, width, height) {
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, width, height);
+      }
+
+      function drawGrid(ctx, plot, xTicks, yTicks) {
+        ctx.save();
+        ctx.strokeStyle = "#e7edf4";
+        ctx.lineWidth = 1;
+
+        for (let i = 0; i <= xTicks; i += 1) {
+          const x = plot.left + (plot.width * i) / xTicks;
+          ctx.beginPath();
+          ctx.moveTo(x, plot.top);
+          ctx.lineTo(x, plot.bottom);
+          ctx.stroke();
+        }
+
+        for (let i = 0; i <= yTicks; i += 1) {
+          const y = plot.top + (plot.height * i) / yTicks;
+          ctx.beginPath();
+          ctx.moveTo(plot.left, y);
+          ctx.lineTo(plot.right, y);
+          ctx.stroke();
+        }
+
+        ctx.strokeStyle = "#cbd6e4";
+        ctx.strokeRect(plot.left, plot.top, plot.width, plot.height);
+        ctx.restore();
+      }
+
+      function drawDashedPath(ctx, points, color, width) {
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.setLineDash([7, 7]);
+        ctx.beginPath();
+        points.forEach((point, index) => {
+          if (index === 0) {
+            ctx.moveTo(point.x, point.y);
+          } else {
+            ctx.lineTo(point.x, point.y);
+          }
+        });
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawPolyline(ctx, points, color, width) {
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        points.forEach((point, index) => {
+          if (index === 0) {
+            ctx.moveTo(point.x, point.y);
+          } else {
+            ctx.lineTo(point.x, point.y);
+          }
+        });
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawPulsePlot(settings, bundle) {
+        resizeCanvas(pulseCanvas, pulseCtx);
+        const width = pulseCanvas.clientWidth;
+        const height = pulseCanvas.clientHeight;
+        clearCanvas(pulseCtx, width, height);
+
+        const plot = {
+          left: 54,
+          right: width - 24,
+          top: 26,
+          bottom: height - 44
+        };
+        plot.width = plot.right - plot.left;
+        plot.height = plot.bottom - plot.top;
+        const middle = plot.top + plot.height * 0.52;
+        const amplitude = plot.height * 0.29;
+
+        drawGrid(pulseCtx, plot, 8, 4);
+
+        pulseCtx.save();
+        pulseCtx.fillStyle = "#eef6f4";
+        pulseCtx.fillRect(plot.left, plot.top, plot.width, plot.height);
+        pulseCtx.globalAlpha = 0.26;
+        pulseCtx.fillStyle = "#ffffff";
+        for (let i = 0; i < 7; i += 1) {
+          const stripeX = plot.left + (plot.width * i) / 7;
+          pulseCtx.fillRect(stripeX, plot.top, plot.width / 14, plot.height);
+        }
+        pulseCtx.restore();
+        drawGrid(pulseCtx, plot, 8, 4);
+
+        pulseCtx.save();
+        pulseCtx.strokeStyle = "#aebaca";
+        pulseCtx.lineWidth = 1.2;
+        pulseCtx.beginPath();
+        pulseCtx.moveTo(plot.left, middle);
+        pulseCtx.lineTo(plot.right, middle);
+        pulseCtx.stroke();
+        pulseCtx.restore();
+
+        const { components, weightSum } = bundle;
+        const samples = Math.max(320, Math.round(plot.width));
+        const fieldPoints = [];
+        const envelopeTop = [];
+        const envelopeBottom = [];
+        const referenceTop = [];
+        const referenceIndex = dispersionIndex(settings.centerFrequency, settings);
+        const dispersionBuild = smoothstep(0, dispersionRiseTime, state.time);
+
+        for (let i = 0; i <= samples; i += 1) {
+          const xFraction = i / samples;
+          const position = xFraction * propagationLength;
+          const canvasX = plot.left + xFraction * plot.width;
+          let real = 0;
+          let imag = 0;
+          let referenceReal = 0;
+          let referenceImag = 0;
+
+          components.forEach((component) => {
+            const referenceDelay = referenceIndex * (position - launchPosition);
+            const dispersiveDelay = referenceDelay + dispersionBuild * (component.index - referenceIndex) * position;
+            const phase = 2 * Math.PI * component.frequency * (state.time - dispersiveDelay);
+            real += component.weight * Math.cos(phase);
+            imag += component.weight * Math.sin(phase);
+
+            const referencePhase = 2 * Math.PI * component.frequency * (state.time - referenceDelay);
+            referenceReal += component.weight * Math.cos(referencePhase);
+            referenceImag += component.weight * Math.sin(referencePhase);
+          });
+
+          const field = real / weightSum;
+          const envelope = Math.hypot(real, imag) / weightSum;
+          const referenceEnvelope = Math.hypot(referenceReal, referenceImag) / weightSum;
+
+          fieldPoints.push({ x: canvasX, y: middle - field * amplitude });
+          envelopeTop.push({ x: canvasX, y: middle - envelope * amplitude });
+          envelopeBottom.push({ x: canvasX, y: middle + envelope * amplitude });
+          referenceTop.push({ x: canvasX, y: middle - referenceEnvelope * amplitude });
+        }
+
+        if (settings.showEnvelope) {
+          drawPolyline(pulseCtx, envelopeTop, "#0f8f83", 2.3);
+          drawPolyline(pulseCtx, envelopeBottom, "#0f8f83", 2.3);
+        }
+
+        if (settings.showReference) {
+          drawDashedPath(pulseCtx, referenceTop, "#8794a8", 2);
+        }
+
+        drawPolyline(pulseCtx, fieldPoints, "#1d64d8", 2.1);
+
+        pulseCtx.save();
+        pulseCtx.fillStyle = "#617089";
+        pulseCtx.font = "12px Inter, ui-sans-serif, system-ui, sans-serif";
+
+        const positionLabelStep = propagationLength >= 8 ? 2 : 1;
+        for (let tick = 0; tick <= propagationLength; tick += positionLabelStep) {
+          const x = plot.left + (tick / propagationLength) * plot.width;
+          pulseCtx.textAlign = "center";
+          pulseCtx.fillText(tick.toFixed(tick % 1 === 0 ? 0 : 1), x, plot.bottom + 17);
+        }
+
+        pulseCtx.textAlign = "left";
+        pulseCtx.fillText("מקור", plot.left, plot.bottom + 34);
+        pulseCtx.textAlign = "right";
+        pulseCtx.fillText("המשך התווך", plot.right, plot.bottom + 34);
+        pulseCtx.textAlign = "center";
+        pulseCtx.fillText("מיקום", plot.left + plot.width / 2, plot.bottom + 34);
+
+        pulseCtx.save();
+        pulseCtx.translate(17, plot.top + plot.height / 2);
+        pulseCtx.rotate(-Math.PI / 2);
+        pulseCtx.fillText("אמפליטודת השדה", 0, 0);
+        pulseCtx.restore();
+        pulseCtx.restore();
+      }
+
+      function drawSpectrum(settings, bundle) {
+        resizeCanvas(spectrumCanvas, spectrumCtx);
+        const width = spectrumCanvas.clientWidth;
+        const height = spectrumCanvas.clientHeight;
+        clearCanvas(spectrumCtx, width, height);
+
+        const plot = {
+          left: width < 520 ? 44 : 54,
+          right: width - (width < 520 ? 54 : 66),
+          top: 22,
+          bottom: height - 44
+        };
+        plot.width = plot.right - plot.left;
+        plot.height = plot.bottom - plot.top;
+
+        const fMin = Math.max(0.5, Math.min(settings.centerFrequency - settings.bandwidth * 0.8, settings.resonanceFrequency - settings.resonanceWidth * 3) - 1);
+        const fMax = Math.max(
+          fMin + 3,
+          Math.max(settings.centerFrequency + settings.bandwidth * 0.8, settings.resonanceFrequency + settings.resonanceWidth * 3) + 1
+        );
+
+        let nMin = Infinity;
+        let nMax = -Infinity;
+        const curve = [];
+        const steps = 280;
+
+        for (let i = 0; i <= steps; i += 1) {
+          const frequency = fMin + ((fMax - fMin) * i) / steps;
+          const index = dispersionIndex(frequency, settings);
+          nMin = Math.min(nMin, index);
+          nMax = Math.max(nMax, index);
+          curve.push({ frequency, index });
+        }
+
+        const nPadding = Math.max(0.14, (nMax - nMin) * 0.28);
+        const nLow = nMin - nPadding;
+        const nHigh = nMax + nPadding;
+        const indexBand = {
+          top: plot.top + 12,
+          bottom: plot.bottom - 16
+        };
+        indexBand.height = indexBand.bottom - indexBand.top;
+
+        const xScale = (frequency) => plot.left + ((frequency - fMin) / (fMax - fMin)) * plot.width;
+        const yWeight = (weight) => plot.bottom - weight * plot.height * 0.72;
+        const yIndex = (index) => indexBand.bottom - ((index - nLow) / (nHigh - nLow)) * indexBand.height;
+
+        drawGrid(spectrumCtx, plot, 6, 4);
+
+        spectrumCtx.save();
+        spectrumCtx.strokeStyle = "#cbd6e4";
+        spectrumCtx.fillStyle = "#617089";
+        spectrumCtx.lineWidth = 1;
+        spectrumCtx.font = "11px Inter, ui-sans-serif, system-ui, sans-serif";
+        spectrumCtx.textAlign = "left";
+        spectrumCtx.textBaseline = "middle";
+
+        for (let i = 0; i <= 4; i += 1) {
+          const value = nLow + ((nHigh - nLow) * i) / 4;
+          const y = yIndex(value);
+          spectrumCtx.beginPath();
+          spectrumCtx.moveTo(plot.right, y);
+          spectrumCtx.lineTo(plot.right + 6, y);
+          spectrumCtx.stroke();
+          spectrumCtx.fillText(value.toFixed(2), plot.right + 10, y);
+        }
+
+        spectrumCtx.save();
+        spectrumCtx.translate(plot.right + (width < 520 ? 38 : 47), plot.top + plot.height / 2);
+        spectrumCtx.rotate(-Math.PI / 2);
+        spectrumCtx.textAlign = "center";
+        spectrumCtx.fillText("n(f)", 0, 0);
+        spectrumCtx.restore();
+        spectrumCtx.restore();
+
+        spectrumCtx.save();
+        spectrumCtx.strokeStyle = "#d8e0ea";
+        spectrumCtx.lineWidth = 1;
+        spectrumCtx.beginPath();
+        spectrumCtx.moveTo(plot.left, yIndex(baseIndex));
+        spectrumCtx.lineTo(plot.right, yIndex(baseIndex));
+        spectrumCtx.stroke();
+        spectrumCtx.restore();
+
+        const centerX = xScale(settings.centerFrequency);
+        const resonanceX = xScale(settings.resonanceFrequency);
+
+        spectrumCtx.save();
+        spectrumCtx.lineWidth = 1.3;
+        spectrumCtx.strokeStyle = "#0f8f83";
+        spectrumCtx.beginPath();
+        spectrumCtx.moveTo(centerX, plot.top);
+        spectrumCtx.lineTo(centerX, plot.bottom);
+        spectrumCtx.stroke();
+
+        spectrumCtx.strokeStyle = "#b77900";
+        spectrumCtx.setLineDash([5, 5]);
+        spectrumCtx.beginPath();
+        spectrumCtx.moveTo(resonanceX, plot.top);
+        spectrumCtx.lineTo(resonanceX, plot.bottom);
+        spectrumCtx.stroke();
+        spectrumCtx.restore();
+
+        spectrumCtx.save();
+        spectrumCtx.strokeStyle = "#1d64d8";
+        spectrumCtx.lineWidth = 2.3;
+        bundle.components.forEach((component) => {
+          const x = xScale(component.frequency);
+          spectrumCtx.beginPath();
+          spectrumCtx.moveTo(x, plot.bottom);
+          spectrumCtx.lineTo(x, yWeight(component.weight));
+          spectrumCtx.stroke();
+          spectrumCtx.beginPath();
+          spectrumCtx.arc(x, yWeight(component.weight), 3.2, 0, Math.PI * 2);
+          spectrumCtx.fillStyle = "#1d64d8";
+          spectrumCtx.fill();
+        });
+        spectrumCtx.restore();
+
+        const curvePoints = curve.map((point) => ({
+          x: xScale(point.frequency),
+          y: yIndex(point.index)
+        }));
+        drawPolyline(spectrumCtx, curvePoints, "#d65645", 2.4);
+
+        spectrumCtx.save();
+        spectrumCtx.fillStyle = "#617089";
+        spectrumCtx.font = "12px Inter, ui-sans-serif, system-ui, sans-serif";
+        spectrumCtx.textAlign = "left";
+        spectrumCtx.fillText(fMin.toFixed(1), plot.left, plot.bottom + 25);
+        spectrumCtx.textAlign = "right";
+        spectrumCtx.fillText(fMax.toFixed(1), plot.right, plot.bottom + 25);
+        spectrumCtx.textAlign = "center";
+        spectrumCtx.fillText("תדר", plot.left + plot.width / 2, plot.bottom + 25);
+        spectrumCtx.fillStyle = "#0f8f83";
+        spectrumCtx.fillText("f0", clamp(centerX, plot.left + 12, plot.right - 12), plot.top + 14);
+        spectrumCtx.fillStyle = "#8c6100";
+        spectrumCtx.fillText("fr", clamp(resonanceX, plot.left + 12, plot.right - 12), plot.top + 30);
+        spectrumCtx.restore();
+      }
+
+      function updateLabels(settings) {
+        values.centerFrequency.textContent = settings.centerFrequency.toFixed(1);
+        values.bandwidth.textContent = settings.bandwidth.toFixed(1);
+        values.componentCount.textContent = String(settings.componentCount);
+        values.resonanceFrequency.textContent = settings.resonanceFrequency.toFixed(1);
+        values.resonanceWidth.textContent = settings.resonanceWidth.toFixed(2);
+        values.dispersionStrength.textContent = settings.dispersionStrength.toFixed(2);
+        values.animationSpeed.textContent = `${settings.animationSpeed.toFixed(2)}x`;
+      }
+
+      function updateReadouts(settings, bundle) {
+        const centerIndex = dispersionIndex(settings.centerFrequency, settings);
+        const centerGroup = groupIndex(settings.centerFrequency, settings);
+        const delays = bundle.components.map((component) => component.group);
+        const minDelay = Math.min(...delays);
+        const maxDelay = Math.max(...delays);
+
+        readouts.index.textContent = centerIndex.toFixed(3);
+        readouts.group.textContent = centerGroup.toFixed(2);
+        readouts.delay.textContent = (maxDelay - minDelay).toFixed(2);
+        readouts.count.textContent = String(bundle.components.length);
+      }
+
+      function render() {
+        const settings = getSettings();
+        const bundle = makeComponents(settings);
+        updateLabels(settings);
+        updateReadouts(settings, bundle);
+        drawPulsePlot(settings, bundle);
+        drawSpectrum(settings, bundle);
+      }
+
+      function resetTime() {
+        state.time = 0;
+        state.lastFrame = 0;
+        render();
+      }
+
+      function animationLoop(timestamp) {
+        const settings = getSettings();
+        if (!state.lastFrame) {
+          state.lastFrame = timestamp;
+        }
+
+        const delta = Math.min(0.05, (timestamp - state.lastFrame) / 1000);
+        state.lastFrame = timestamp;
+
+        if (state.playing) {
+          const bundle = makeComponents(settings);
+          const delays = bundle.components.map((component) => component.group);
+          const endTime = clamp(Math.max(...delays) * (propagationLength - launchPosition) + 0.82, 2.2, 32);
+          state.time += delta * settings.animationSpeed * 0.42;
+          if (state.time > endTime) {
+            state.time = 0;
+          }
+        }
+
+        render();
+        requestAnimationFrame(animationLoop);
+      }
+
+      Object.values(controls).forEach((control) => {
+        control.addEventListener("input", () => {
+          if (control === controls.centerFrequency) {
+            const center = Number(controls.centerFrequency.value);
+            const halfBandwidth = Number(controls.bandwidth.value) / 2;
+            if (center - halfBandwidth < 0.6) {
+              controls.bandwidth.value = Math.max(0.4, (center - 0.6) * 2).toFixed(1);
+            }
+          }
+          render();
+        });
+      });
+
+      buttons.playPause.addEventListener("click", () => {
+        state.playing = !state.playing;
+        buttons.playPause.textContent = state.playing ? "עצירה" : "הפעלה";
+        buttons.playPause.classList.toggle("primary-button", state.playing);
+      });
+
+      buttons.reset.addEventListener("click", resetTime);
+
+      const resizeObserver = new ResizeObserver(render);
+      resizeObserver.observe(pulseCanvas);
+      resizeObserver.observe(spectrumCanvas);
+
+      resetTime();
+      requestAnimationFrame(animationLoop);
+    })();
+  </script>
+</body>
+</html>
