@@ -595,7 +595,7 @@
         statusMagnetic: "magnetic interface by image line current"
       },
       he: {
-        title: "קווי מטען בסמוך לאי רציפות דיאלקטרית",
+        title: "מקורות נקודתיים בסמוך לאי רציפות בתכונות החומר",
         subtitle: "הדגמה של פתרון מטען קווי אחיד מעל חצי-מרחב דיאלקטרי בעזרת מטען דמות, עם מעבר לבעיה הדואלית של זרם קווי באי רציפות בפרמאביליות.",
         portal: "חזרה לפורטל",
         plotHeading: "מפת פוטנציאל ושדה",
@@ -1229,24 +1229,23 @@
 
     function drawLabel(ctx, text, x, y, align) {
       ctx.save();
-      ctx.font = "600 12px Inter, Segoe UI, sans-serif";
+      ctx.font = "700 18px Inter, Segoe UI, sans-serif";
       ctx.textAlign = align || "center";
       ctx.textBaseline = "middle";
       const metrics = ctx.measureText(text);
-      const padX = 7;
-      const padY = 5;
+      const padX = 10;
       const width = metrics.width + padX * 2;
-      const height = 22;
+      const height = 34;
       const left = align === "left" ? x - padX : align === "right" ? x - width + padX : x - width / 2;
-      ctx.fillStyle = "rgba(255, 255, 255, 0.86)";
-      ctx.strokeStyle = "rgba(96, 112, 134, 0.28)";
-      ctx.lineWidth = 1;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+      ctx.strokeStyle = "rgba(96, 112, 134, 0.38)";
+      ctx.lineWidth = 1.4;
       ctx.beginPath();
-      ctx.roundRect(left, y - height / 2, width, height, 7);
+      ctx.roundRect(left, y - height / 2, width, height, 8);
       ctx.fill();
       ctx.stroke();
       ctx.fillStyle = "#263047";
-      ctx.fillText(text, x, y + 0.5);
+      ctx.fillText(text, x, y + 1);
       ctx.restore();
     }
 
@@ -1264,7 +1263,7 @@
       ctx.fill();
       ctx.stroke();
       ctx.fillStyle = "#ffffff";
-      ctx.font = "800 13px Inter, Segoe UI, sans-serif";
+      ctx.font = "900 18px Inter, Segoe UI, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(c.mode === "electric" ? "+" : "I", real.x, real.y + 0.5);
@@ -1289,7 +1288,7 @@
         ctx.stroke();
         ctx.globalAlpha = 1;
         ctx.fillStyle = "#ffffff";
-        ctx.font = "800 12px Inter, Segoe UI, sans-serif";
+      ctx.font = "900 17px Inter, Segoe UI, sans-serif";
         ctx.fillText(k.image >= 0 ? "+" : "-", image.x, image.y + 0.5);
         const label = (c.mode === "electric" ? t("imageLabelElectric") : t("imageLabelMagnetic")) + " " + formatSigned(k.image);
         drawLabel(ctx, label, image.x, image.y + 27);
@@ -1319,7 +1318,7 @@
       ctx.lineTo(zero.x, plot.oy + plot.height);
       ctx.stroke();
       ctx.fillStyle = "rgba(38, 48, 71, 0.72)";
-      ctx.font = "600 12px Inter, Segoe UI, sans-serif";
+      ctx.font = "800 18px Inter, Segoe UI, sans-serif";
       ctx.textAlign = "right";
       ctx.textBaseline = "bottom";
       ctx.fillText("z = 0", plot.ox + plot.width - 10, zero.y - 7);
